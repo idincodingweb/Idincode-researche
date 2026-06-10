@@ -1,0 +1,23 @@
+[project]
+name = "apex-intel"
+version = "0.1.0"
+description = "Self-curated lead qualification pipeline"
+requires-python = ">=3.11"
+dependencies = [
+    "httpx>=0.27",          # async HTTP client (dipakai Fase 1)
+    "pyyaml>=6.0",          # parsing targets.yaml
+    "python-dotenv>=1.0",   # load .env (PAGESPEED_API_KEY)
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
