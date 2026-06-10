@@ -1,0 +1,2 @@
+# Idincode-researche
+Software automation
