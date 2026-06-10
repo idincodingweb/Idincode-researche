@@ -25,12 +25,13 @@ def normalize_domain(raw: str) -> str:
     """
     Bersihin domain ke bentuk kanonik.
       'https://Equinox.com/'  -> 'equinox.com'
-      'www.Barry-s.com'       -> 'barry-s.com'  (www DIPERTAHANKAN? lihat catatan)
+      'www.Barrys.com'        -> 'barrys.com'
     """
     raw = raw.strip().lower()
     # Buang scheme kalau ada (pakai urlparse biar robust)
     if "://" in raw:
-        raw = urlparse(raw).netloc or urlparse(raw).path
+        parsed = urlparse(raw)
+        raw = parsed.netloc or parsed.path
     # Buang trailing slash, path, query
     raw = raw.split("/")[0].split("?")[0]
     # Buang 'www.' di depan biar dedup konsisten
@@ -46,7 +47,17 @@ def _is_valid_domain(domain: str) -> bool:
     # Tolak spasi & karakter jelas-jelas salah
     if any(c in domain for c in " \t\n<>\"'"):
         return False
+    # Tolak kalau diawali/diakhiri titik atau ada titik dobel
+    if domain.startswith(".") or domain.endswith(".") or ".." in domain:
+        return False
     return True
+
+
+def _coerce_str(value: Any) -> str:
+    """Aman ubah ke string lalu strip. None jadi string kosong."""
+    if value is None:
+        return ""
+    return str(value).strip()
 
 
 def _validate_and_build(data: dict[str, Any]) -> TargetsConfig:
@@ -58,8 +69,8 @@ def _validate_and_build(data: dict[str, Any]) -> TargetsConfig:
     if not isinstance(meta, dict):
         errors.append("'meta' wajib ada dan berupa mapping.")
         meta = {}
-    generated_by = meta.get("generated_by", "")
-    version = str(meta.get("version", ""))
+    generated_by = _coerce_str(meta.get("generated_by"))
+    version = _coerce_str(meta.get("version"))
     if not generated_by:
         errors.append("'meta.generated_by' wajib diisi.")
 
@@ -79,8 +90,8 @@ def _validate_and_build(data: dict[str, Any]) -> TargetsConfig:
             errors.append(f"{prefix} harus berupa mapping.")
             continue
 
-        name = raw_cat.get("name", "").strip()
-        niche = raw_cat.get("niche", "").strip()
+        name = _coerce_str(raw_cat.get("name"))
+        niche = _coerce_str(raw_cat.get("niche"))
 
         if not name:
             errors.append(f"{prefix}.name wajib diisi.")
@@ -116,7 +127,7 @@ def _validate_and_build(data: dict[str, Any]) -> TargetsConfig:
                     errors.append(f"{t_prefix} harus berupa mapping.")
                     continue
                 raw_domain = raw_t.get("domain", "")
-                if not raw_domain:
+                if not _coerce_str(raw_domain):
                     errors.append(f"{t_prefix}.domain wajib diisi.")
                     continue
 
