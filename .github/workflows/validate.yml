@@ -1,0 +1,30 @@
+name: Validate Targets
+
+# Jalan tiap push/PR yang nyentuh file relevan
+on:
+  push:
+    paths:
+      - "targets.yaml"
+      - "src/**"
+      - "scripts/**"
+      - ".github/workflows/validate.yml"
+  pull_request:
+  workflow_dispatch:   # bisa di-run manual dari tab Actions
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install pyyaml
+
+      - name: Validate targets.yaml
+        run: python scripts/validate_targets.py
