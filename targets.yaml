@@ -1,0 +1,58 @@
+# ============================================================
+# Apex Market Intelligence — Target Definitions
+# ------------------------------------------------------------
+# File ini adalah "otak" produk. Tiap kategori = satu SKU.
+# Cara nambah target: tinggal tambah entry di bawah `targets`.
+# Cara nambah produk baru: tambah blok `category` baru.
+# ============================================================
+
+meta:
+  generated_by: "Idin - Apex Market Intelligence"
+  version: "1.0"
+
+categories:
+  # ----------------------------------------------------------
+  - name: "Klinik Estetika & Kedokteran Gigi Premium"
+    niche: medical_high_ticket    # ← dipakai qualifier buat pilih threshold
+    targets:
+      - domain: "nygplasticsurgery.com"
+        location: "New York, NY"
+      - domain: "careplasticsurgery.com"
+        location: "Chicago, IL"
+      - domain: "shaferplasticsurgery.com"
+        location: "New York, NY"
+      - domain: "visagefacialsurgery.com"
+        location: "San Francisco, CA"
+      - domain: "miamiaesthetic.com"
+        location: "Miami, FL"
+      - domain: "liuplasticsurgery.com"
+        location: "Cupertino, CA"
+    # Sumber referensi buat NAMBAH target manual (bukan untuk di-scrape):
+    directories:
+      - "https://americanboardcosmeticsurgery.org/doctors/"
+      - "https://plasticsurgery.org"
+      - "https://theaestheticsociety.org/consumers/find-a-plastic-surgeon/US"
+
+  # ----------------------------------------------------------
+  - name: "Luxury Fitness / Gym Eksklusif"
+    niche: luxury_fitness
+    targets:
+      - domain: "equinox.com"
+        tier: "Premium"
+        details: "$170-$260/mo"
+      - domain: "barrys.com"
+        tier: "Premium"
+        details: "$200-$350/mo"
+      - domain: "soul-cycle.com"
+        tier: "Premium"
+        details: "~$250/mo"
+      - domain: "clubstudiofitness.com"
+        tier: "Premium"
+        details: "~$150-$200/mo"
+      - domain: "lafitness.com"
+        tier: "Premium Tier"
+        details: "~$100+/mo"
+    directories:
+      - "https://goteamup.com/resources/luxurious-gyms-in-united-states"
+      - "https://wod.guru/blog/luxury-gyms/"
+      - "https://us.egym.com/en-us/blog/most-expensive-gym-memberships"
