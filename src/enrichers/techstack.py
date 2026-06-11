@@ -1,40 +1,18 @@
 # src/enrichers/techstack.py
 from __future__ import annotations
-from dataclasses import dataclass
+import re
 
-@dataclass(slots=True)
-class TechStackResult:
-    platform: str | None  # 'Shopify', 'WooCommerce', 'WordPress', 'Wix', dll.
+from src.models import TechStack
 
-def detect_platform(html: str, headers: dict[str, str]) -> TechStackResult:
-    """
-    Deteksi platform kombinasi dari HTTP Headers dan HTML source.
-    """
-    # 1. Cek dari HTTP Headers (Paling akurat)
-    headers_lower = {k.lower(): v.lower() for k, v in headers.items()}
-    
-    if "x-shopify-stage" in headers_lower or "shopify" in headers_lower.get("x-powered-by", ""):
-        return TechStackResult(platform="Shopify")
-    
-    if "x-wix-request-id" in headers_lower:
-        return TechStackResult(platform="Wix")
 
-    # 2. Cek dari HTML Footprint (Fallback)
-    html_lower = html.lower()
-    
-    if "cdn.shopify.com" in html_lower:
-        return TechStackResult(platform="Shopify")
-        
-    if "wp-content/plugins/woocommerce" in html_lower:
-        return TechStackResult(platform="WooCommerce")
-        
-    if "wp-content/themes/" in html_lower or "wp-includes/" in html_lower:
-        return TechStackResult(platform="WordPress")
-        
-    if "static.wixstatic.com" in html_lower:
-        return TechStackResult(platform="Wix")
-        
-    if "squarespace.com" in html_lower:
-        return TechStackResult(platform="Squarespace")
+def detect_platform(html: str, headers: dict[str, str]) -> TechStack:
+    if not html and not headers:
+        return TechStack(platform=None)
 
-    return TechStackResult(platform=None)
+    h = {k.lower(): v for k, v in headers.items()}
+    html_l = html.lower() if html else ""
+
+    if "x-shopify-stage" in h or "x-shopid" in h:
+        return TechStack(platform="Shopify")
+    if "cdn.shopify.com" in html_l:
+        return TechStack
