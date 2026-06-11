@@ -11,41 +11,30 @@ from src.models import EnrichmentResult, QualifiedLead
 # Niche Weights (sum = 1.0 per niche)
 # ============================================================
 NICHE_CONFIG: dict[str, dict[str, float]] = {
-    "medical_high_ticket": {
+    # ... existing configs ...
+    "cosmetic_dentistry": {
+        "pixels": 0.45,
+        "pagespeed": 0.30,
+        "lcp": 0.15,
+        "platform": 0.10,
+    },
+    "premium_orthodontics": {
         "pixels": 0.40,
         "pagespeed": 0.35,
         "lcp": 0.15,
         "platform": 0.10,
     },
-    "luxury_fitness": {
+    "weight_loss_glp1": {
         "pixels": 0.35,
-        "pagespeed": 0.30,
-        "lcp": 0.20,
-        "platform": 0.15,
-    },
-    "premium_gym": {
-        "pixels": 0.35,
-        "pagespeed": 0.30,
-        "lcp": 0.20,
-        "platform": 0.15,
-    },
-    "cosmetic_dentistry": {
-        "pixels": 0.45,  # Dentist biasanya kurang pixel-savvy
-        "pagespeed": 0.30,
-        "lcp": 0.15,
-        "platform": 0.10,
-    },
-    "high_ticket_contractor": {
-        "pixels": 0.45,  # Kontraktor renovasi sering minimal tracking
-        "pagespeed": 0.25,
+        "pagespeed": 0.35,
         "lcp": 0.15,
         "platform": 0.15,
     },
-    "default": {
-        "pixels": 0.40,
+    "premium_hair_restoration": {
+        "pixels": 0.42,
         "pagespeed": 0.30,
-        "lcp": 0.20,
-        "platform": 0.10,
+        "lcp": 0.15,
+        "platform": 0.13,
     },
 }
 
