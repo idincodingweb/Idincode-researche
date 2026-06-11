@@ -1,13 +1,6 @@
-# src/analyst.py (VERSI FIXED — Anthropic Native Format)
+# src/analyst.py (VERSI OPENAI-COMPATIBLE)
 """
-Claude AI Analyst Layer (via kie.ai — Anthropic native endpoint)
-
-Tugas modul ini: ngubah data mentah enrichment jadi narasi yang JUAL.
-
-Design:
-  - Single batch call ke kie.ai endpoint /claude/v1/messages
-  - Graceful degradation: kalo API key kosong / kie.ai down -> fallback template
-  - Structured JSON output dari Claude untuk parsing reliable
+Claude AI Analyst Layer (via kie.ai — OpenAI-compatible proxy)
 """
 from __future__ import annotations
 import asyncio
@@ -25,18 +18,12 @@ from src.config import (
 from src.models import QualifiedLead
 
 
-# ============================================================
-# Public entry point
-# ============================================================
-
 async def enrich_with_ai_analyst(
     leads: list[QualifiedLead],
     *,
     max_retries: int = 2,
 ) -> list[QualifiedLead]:
-    """
-    Enrich SEMUA leads dengan AI-generated gold_reasons + outreach_angle.
-    """
+    """Enrich SEMUA leads dengan AI-generated gold_reasons + outreach_angle."""
     if not leads:
         return leads
 
@@ -68,7 +55,7 @@ async def enrich_with_ai_analyst(
 
 
 # ============================================================
-# kie.ai API call (Anthropic native endpoint)
+# kie.ai API call (OpenAI-compatible format)
 # ============================================================
 
 async def _call_claude_batch(
@@ -77,30 +64,30 @@ async def _call_claude_batch(
     max_retries: int,
 ) -> dict[str, dict[str, str]]:
     """
-    Call kie.ai endpoint /claude/v1/messages (Anthropic native format).
+    Call kie.ai endpoint /v1/chat/completions (OpenAI-compatible).
     Return dict {domain: {gold_reasons, outreach_angle}}.
     """
     system_prompt = _build_system_prompt()
     user_prompt = _build_user_prompt(leads)
 
+    # OpenAI-compatible format
     payload = {
-        "model": KIE_AI_MODEL,  # "claude-opus-4-7" atau yg lo atur di config
+        "model": KIE_AI_MODEL,  # "claude-sonnet-4-5-20250929"
         "max_tokens": 4000,
-        "stream": False,
+        "temperature": 0.4,
         "messages": [
+            {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt},
         ],
-        "system": system_prompt,  # Anthropic native: system di top level, bukan di messages
     }
 
     headers = {
         "Authorization": f"Bearer {IDINCODE_API}",
         "Content-Type": "application/json",
-        "anthropic-version": "2023-06-01",  # Anthropic API version (required)
     }
 
-    # Endpoint Anthropic native (dari baseai.txt lo)
-    url = f"{KIE_AI_BASE_URL.rstrip('/')}/claude/v1/messages"
+    # Endpoint OpenAI-compatible (BENAR untuk kie.ai/v1)
+    url = f"{KIE_AI_BASE_URL.rstrip('/')}/chat/completions"
 
     last_error: Exception | None = None
     for attempt in range(max_retries + 1):
@@ -206,38 +193,30 @@ def _build_user_prompt(leads: list[QualifiedLead]) -> str:
 
 
 # ============================================================
-# Response parsing (Anthropic native format)
+# Response parsing (OpenAI-compatible format)
 # ============================================================
 
 def _extract_text_from_response(data: dict[str, Any]) -> str:
     """
-    Extract text dari Anthropic native response format.
+    Extract text dari OpenAI-compatible response format.
     
-    Expected format (dari kie.ai /claude/v1/messages):
+    Expected format:
     {
-      "content": [
-        {"type": "text", "text": "..."},
-        ...
-      ],
-      "stop_reason": "end_turn"
+      "choices": [
+        {
+          "message": {
+            "content": "..."
+          }
+        }
+      ]
     }
     """
-    content = data.get("content")
-    if isinstance(content, list) and content:
-        # Anthropic native: content adalah list of blocks
-        for block in content:
-            if isinstance(block, dict) and block.get("type") == "text":
-                text = block.get("text", "")
-                if text:
-                    return text
-
-    # Fallback: check jika format OpenAI-compatible ternyata dikirim
     choices = data.get("choices")
     if isinstance(choices, list) and choices:
         msg = choices[0].get("message", {})
-        content_field = msg.get("content", "")
-        if isinstance(content_field, str) and content_field:
-            return content_field
+        content = msg.get("content", "")
+        if isinstance(content, str) and content:
+            return content
 
     return ""
 
@@ -371,4 +350,4 @@ def _fallback_outreach(lead: QualifiedLead) -> str:
     return (
         f"Subject: 3 quick wins I spotted for {domain_label} "
         f"(takes 5 min to read)"
-    )
+  )
