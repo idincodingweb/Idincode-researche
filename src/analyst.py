@@ -161,30 +161,27 @@ async def _call_claude_batch(
 # Dynamic Prompt Builder (per-niche context)
 # ============================================================
 _NICHE_CONTEXT: dict[str, dict[str, str]] = {
-    "medical_high_ticket": {
-        "industry_label": "premium plastic surgery & aesthetic clinics",
-        "typical_ticket": "$5,000-$50,000 per procedure",
-        "pain_point": "high CAC, low attribution clarity",
-    },
-    "luxury_fitness": {
-        "industry_label": "luxury fitness & wellness brands",
-        "typical_ticket": "$200-$2,000/month memberships",
-        "pain_point": "member churn, weak retention funnels",
-    },
-    "premium_gym": {
-        "industry_label": "premium gym & boutique fitness studios",
-        "typical_ticket": "$150-$500/month memberships",
-        "pain_point": "lead-to-trial conversion drop-off",
-    },
+_NICHE_CONTEXT: dict[str, dict[str, str]] = {
+    # ... existing ...
     "cosmetic_dentistry": {
         "industry_label": "cosmetic & implant dentistry practices",
         "typical_ticket": "$3,000-$30,000 per case",
-        "pain_point": "consult-to-book conversion, attribution",
+        "pain_point": "consult-to-book conversion, attribution clarity",
     },
-    "high_ticket_contractor": {
-        "industry_label": "luxury home renovation & custom build contractors",
-        "typical_ticket": "$50,000-$500,000+ per project",
-        "pain_point": "long sales cycle, weak lead nurturing",
+    "premium_orthodontics": {
+        "industry_label": "premium orthodontics & clear aligner clinics",
+        "typical_ticket": "$3,000-$8,000 per patient",
+        "pain_point": "adult market competition, patient LTV tracking",
+    },
+    "weight_loss_glp1": {
+        "industry_label": "weight loss & GLP-1 telehealth clinics",
+        "typical_ticket": "$200-$500/month subscription",
+        "pain_point": "telehealth conversion gaps, retention funnels",
+    },
+    "premium_hair_restoration": {
+        "industry_label": "premium hair restoration & transplant clinics",
+        "typical_ticket": "$8,000-$15,000 per procedure",
+        "pain_point": "high CAC, emotional + surgical decision support",
     },
 }
 
