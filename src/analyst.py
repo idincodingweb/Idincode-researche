@@ -1,8 +1,11 @@
-# src/analyst.py (VERSI OPENAI-COMPATIBLE)
-"""
-Claude AI Analyst Layer (via kie.ai — OpenAI-compatible proxy)
+# src/analyst.py
+"""Claude AI Analyst Layer (via kie.ai — OpenAI-compatible proxy).
+
+Generate gold_reasons + outreach_angle untuk setiap qualified lead.
+Graceful fallback ke deterministic template kalau API fail.
 """
 from __future__ import annotations
+
 import asyncio
 import json
 import re
@@ -18,6 +21,9 @@ from src.config import (
 from src.models import QualifiedLead
 
 
+# ============================================================
+# Public API
+# ============================================================
 async def enrich_with_ai_analyst(
     leads: list[QualifiedLead],
     *,
@@ -36,7 +42,10 @@ async def enrich_with_ai_analyst(
     try:
         ai_results = await _call_claude_batch(leads, max_retries=max_retries)
     except Exception as e:  # noqa: BLE001
-        print(f"[analyst] WARN: Claude call failed ({type(e).__name__}: {e}), pakai fallback")
+        print(
+            f"[analyst] WARN: Claude call failed "
+            f"({type(e).__name__}: {e}), pakai fallback"
+        )
         return _apply_fallback_to_all(leads)
 
     enriched: list[QualifiedLead] = []
@@ -57,22 +66,20 @@ async def enrich_with_ai_analyst(
 # ============================================================
 # kie.ai API call (OpenAI-compatible format)
 # ============================================================
-
 async def _call_claude_batch(
     leads: list[QualifiedLead],
     *,
     max_retries: int,
 ) -> dict[str, dict[str, str]]:
-    """
-    Call kie.ai endpoint /v1/chat/completions (OpenAI-compatible).
+    """Call kie.ai endpoint /v1/chat/completions (OpenAI-compatible).
+    
     Return dict {domain: {gold_reasons, outreach_angle}}.
     """
-    system_prompt = _build_system_prompt()
+    system_prompt = _build_system_prompt(leads)
     user_prompt = _build_user_prompt(leads)
 
-    # OpenAI-compatible format
     payload = {
-        "model": KIE_AI_MODEL,  # "claude-sonnet-4-5-20250929"
+        "model": KIE_AI_MODEL,
         "max_tokens": 4000,
         "temperature": 0.4,
         "messages": [
@@ -86,7 +93,6 @@ async def _call_claude_batch(
         "Content-Type": "application/json",
     }
 
-    # Endpoint OpenAI-compatible (BENAR untuk kie.ai/v1)
     url = f"{KIE_AI_BASE_URL.rstrip('/')}/chat/completions"
 
     last_error: Exception | None = None
@@ -104,7 +110,9 @@ async def _call_claude_batch(
                 raise ValueError("Empty or invalid JSON from Claude")
 
             if resp.status_code in (429, 500, 502, 503, 504):
-                last_error = RuntimeError(f"HTTP {resp.status_code}: {resp.text[:200]}")
+                last_error = RuntimeError(
+                    f"HTTP {resp.status_code}: {resp.text[:200]}"
+                )
                 if attempt < max_retries:
                     wait = 2 ** attempt
                     print(f"[analyst] HTTP {resp.status_code}, retry in {wait}s...")
@@ -129,25 +137,70 @@ async def _call_claude_batch(
 
 
 # ============================================================
-# Prompt builders
+# Dynamic Prompt Builder (FIX: gak hardcoded plastic surgery lagi)
 # ============================================================
+_NICHE_CONTEXT: dict[str, dict[str, str]] = {
+    "medical_high_ticket": {
+        "industry_label": "premium plastic surgery & aesthetic clinics",
+        "typical_ticket": "$5,000-$50,000 per procedure",
+        "pain_point": "high CAC, low attribution clarity",
+    },
+    "luxury_fitness": {
+        "industry_label": "luxury fitness & wellness brands",
+        "typical_ticket": "$200-$2,000/month memberships",
+        "pain_point": "member churn, weak retention funnels",
+    },
+    "premium_gym": {
+        "industry_label": "premium gym & boutique fitness studios",
+        "typical_ticket": "$150-$500/month memberships",
+        "pain_point": "lead-to-trial conversion drop-off",
+    },
+    "cosmetic_dentistry": {
+        "industry_label": "cosmetic & implant dentistry practices",
+        "typical_ticket": "$3,000-$30,000 per case",
+        "pain_point": "consult-to-book conversion, attribution",
+    },
+    "high_ticket_contractor": {
+        "industry_label": "luxury home renovation & custom build contractors",
+        "typical_ticket": "$50,000-$500,000+ per project",
+        "pain_point": "long sales cycle, weak lead nurturing",
+    },
+}
 
-def _build_system_prompt() -> str:
+
+def _detect_primary_niche(leads: list[QualifiedLead]) -> str:
+    """Cari niche paling umum di batch."""
+    counts: dict[str, int] = {}
+    for lead in leads:
+        counts[lead.niche] = counts.get(lead.niche, 0) + 1
+    if not counts:
+        return "medical_high_ticket"
+    return max(counts.items(), key=lambda x: x[1])[0]
+
+
+def _build_system_prompt(leads: list[QualifiedLead]) -> str:
+    """Build dynamic system prompt berdasarkan niche dominant di batch."""
+    primary_niche = _detect_primary_niche(leads)
+    ctx = _NICHE_CONTEXT.get(primary_niche, _NICHE_CONTEXT["medical_high_ticket"])
+
     return (
-        "You are an expert B2B sales analyst specializing in healthcare/medspa "
-        "digital marketing. You analyze website tracking infrastructure & performance "
-        "data to identify SALES OPPORTUNITIES for marketing agencies.\n\n"
-        "Your output is used by agencies to cold-pitch services to plastic surgery "
-        "clinics. Be SPECIFIC, ACTIONABLE, and slightly URGENT.\n\n"
+        f"You are an expert B2B sales analyst specializing in digital marketing "
+        f"for {ctx['industry_label']} (typical deal size: {ctx['typical_ticket']}, "
+        f"common pain point: {ctx['pain_point']}).\n\n"
+        f"Your job: analyze website tracking infrastructure & performance data to "
+        f"identify SALES OPPORTUNITIES that marketing agencies can pitch.\n\n"
+        f"Your output is used by agencies to cold-pitch services to these businesses. "
+        f"Be SPECIFIC, ACTIONABLE, and slightly URGENT.\n\n"
         "Rules:\n"
         "1. Output ONLY valid JSON. No markdown fences, no preamble.\n"
         "2. For each domain, generate:\n"
-        "   - gold_reasons (1-2 sentences): WHY this is a hot lead. Mention "
-        "     specific dollar impact when possible.\n"
+        "   - gold_reasons (1-2 sentences): WHY this is a hot lead. Reference "
+        "specific gaps with concrete impact (revenue, attribution clarity, ROAS).\n"
         "   - outreach_angle (1 sentence): A cold email subject line OR opening "
-        "     hook that an agency could use immediately.\n"
-        "3. Tone: confident, data-driven, no fluff.\n"
-        "4. If a clinic already has good infra, say 'limited opportunity' honestly.\n"
+        "hook an agency can use immediately. Make it pattern-interrupting.\n"
+        "3. Tone: confident, data-driven, no fluff, no buzzwords.\n"
+        "4. If a clinic/business already has mature infra, honestly say "
+        "'limited opportunity'.\n"
         "5. Response format MUST be exactly:\n"
         "{\n"
         '  "results": {\n'
@@ -160,9 +213,9 @@ def _build_system_prompt() -> str:
 
 def _build_user_prompt(leads: list[QualifiedLead]) -> str:
     lines = [
-        "Analyze these plastic surgery clinics. For each, generate gold_reasons "
-        "& outreach_angle. Return JSON only.\n",
-        "Data per clinic:",
+        "Analyze these businesses. For each, generate gold_reasons & "
+        "outreach_angle. Return JSON only.\n",
+        "Data per business:",
     ]
 
     for lead in leads:
@@ -182,50 +235,36 @@ def _build_user_prompt(leads: list[QualifiedLead]) -> str:
         rt_str = f"{lead.response_ms}ms" if lead.response_ms else "N/A"
 
         lines.append(
-            f"- domain={lead.domain} | location={lead.location or 'N/A'} | "
-            f"platform={lead.platform or 'Unknown'} | pixels_in_html=[{pixels_str}] | "
+            f"- domain={lead.domain} | niche={lead.niche} | "
+            f"location={lead.location or 'N/A'} | "
+            f"platform={lead.platform or 'Unknown'} | "
+            f"pixels_in_html=[{pixels_str}] | "
             f"pagespeed_mobile={ps_str} | lcp={lcp_str} | response_time={rt_str} | "
             f"gold_score={lead.score:.2f}"
         )
 
-    lines.append("\nRemember: output ONLY the JSON object, no markdown, no explanation.")
+    lines.append(
+        "\nRemember: output ONLY the JSON object, no markdown, no explanation."
+    )
     return "\n".join(lines)
 
 
 # ============================================================
 # Response parsing (OpenAI-compatible format)
 # ============================================================
-
 def _extract_text_from_response(data: dict[str, Any]) -> str:
-    """
-    Extract text dari OpenAI-compatible response format.
-    
-    Expected format:
-    {
-      "choices": [
-        {
-          "message": {
-            "content": "..."
-          }
-        }
-      ]
-    }
-    """
+    """Extract text dari OpenAI-compatible response format."""
     choices = data.get("choices")
     if isinstance(choices, list) and choices:
         msg = choices[0].get("message", {})
         content = msg.get("content", "")
         if isinstance(content, str) and content:
             return content
-
     return ""
 
 
 def _parse_json_response(text: str) -> dict[str, dict[str, str]]:
-    """
-    Parse JSON dari response. Strip markdown kalau Ada (defensive).
-    Return dict {domain: {gold_reasons, outreach_angle}}.
-    """
+    """Parse JSON dari response. Strip markdown kalau ada (defensive)."""
     if not text:
         return {}
 
@@ -263,7 +302,6 @@ def _parse_json_response(text: str) -> dict[str, dict[str, str]]:
 # ============================================================
 # Fallback (deterministic, no API needed)
 # ============================================================
-
 def _apply_fallback_to_all(leads: list[QualifiedLead]) -> list[QualifiedLead]:
     for lead in leads:
         lead.gold_reasons = _fallback_reasons(lead)
@@ -297,11 +335,13 @@ def _fallback_reasons(lead: QualifiedLead) -> str:
     if lead.pagespeed_score is not None:
         if lead.pagespeed_score < 50:
             reasons.append(
-                f"Mobile PageSpeed {lead.pagespeed_score}/100 - high bounce risk on mobile traffic."
+                f"Mobile PageSpeed {lead.pagespeed_score}/100 - high bounce risk "
+                f"on mobile traffic."
             )
         elif lead.pagespeed_score < 70:
             reasons.append(
-                f"Mobile PageSpeed {lead.pagespeed_score}/100 - room for conversion uplift."
+                f"Mobile PageSpeed {lead.pagespeed_score}/100 - room for "
+                f"conversion uplift."
             )
 
     if lead.response_ms and lead.response_ms > 3000:
@@ -310,10 +350,15 @@ def _fallback_reasons(lead: QualifiedLead) -> str:
         )
 
     if lead.platform and lead.platform.lower() in ("wordpress", "woocommerce"):
-        reasons.append("WordPress stack - easy to onboard for tracking & speed fixes.")
+        reasons.append(
+            "WordPress stack - easy to onboard for tracking & speed fixes."
+        )
 
     if not reasons:
-        return "Limited opportunity - infrastructure looks healthy. Consider for retention plays only."
+        return (
+            "Limited opportunity - infrastructure looks healthy. "
+            "Consider for retention plays only."
+        )
 
     return " ".join(reasons)
 
@@ -331,14 +376,14 @@ def _fallback_outreach(lead: QualifiedLead) -> str:
 
     if len(missing_pixels) >= 2:
         return (
-            f"Subject: Found {len(missing_pixels)} tracking gaps on {domain_label}'s site "
-            f"- worth a 15-min chat?"
+            f"Subject: Found {len(missing_pixels)} tracking gaps on "
+            f"{domain_label}'s site - worth a 15-min chat?"
         )
 
     if lead.pagespeed_score is not None and lead.pagespeed_score < 50:
         return (
-            f"Subject: {domain_label}'s mobile site loads at {lead.pagespeed_score}/100 "
-            f"- here's what it's costing you"
+            f"Subject: {domain_label}'s mobile site loads at "
+            f"{lead.pagespeed_score}/100 - here's what it's costing you"
         )
 
     if lead.response_ms and lead.response_ms > 3000:
@@ -350,4 +395,4 @@ def _fallback_outreach(lead: QualifiedLead) -> str:
     return (
         f"Subject: 3 quick wins I spotted for {domain_label} "
         f"(takes 5 min to read)"
-  )
+    )
