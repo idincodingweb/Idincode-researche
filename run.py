@@ -1,16 +1,22 @@
 # run.py
-"""
-Apex Market Intelligence - Entry Point
+"""Apex Market Intelligence — Lead Qualification Pipeline.
 
-Run dari command line:
-    python run.py
+Built by Idin Iskandar.
 
-Atau di GitHub Actions, di-trigger otomatis lewat .github/workflows/research.yml
+Usage:
+    python run.py                     # default targets.yaml
+    python run.py --targets path.yaml # custom path
+
+CI/CD: dipakai di .github/workflows/research.yml
 """
 from __future__ import annotations
+
+import argparse
 import asyncio
 import sys
-import traceback
+
+from src.config import IDINCODE_API, PAGESPEED_API_KEY
+from src.pipeline import run_pipeline
 
 
 def _print_banner() -> None:
@@ -21,64 +27,61 @@ def _print_banner() -> None:
 
 
 def _print_env_status() -> None:
-    """Print which optional integrations are active."""
-    from src.config import PAGESPEED_API_KEY, IDINCODE_API
-
-    print("\n[ENV CHECK]")
-    ps_status = "SET" if PAGESPEED_API_KEY else "MISSING (PageSpeed akan di-skip)"
-    ai_status = "SET" if IDINCODE_API else "MISSING (Claude analyst akan di-skip, pakai fallback)"
-    print(f"  PAGESPEED_API_KEY : {ps_status}")
-    print(f"  IDINCODE_API      : {ai_status}")
-    print()
+    print("[ENV CHECK]")
+    print(f"  PAGESPEED_API_KEY : {'SET' if PAGESPEED_API_KEY else 'MISSING'}")
+    print(f"  IDINCODE_API      : {'SET' if IDINCODE_API else 'MISSING'}")
 
 
-async def _async_main() -> int:
-    """Async entry point. Return exit code."""
-    from src.pipeline import run_pipeline
-
-    try:
-        summary = await run_pipeline(targets_path="targets.yaml")
-    except FileNotFoundError as e:
-        print(f"\n[ERROR] FILE NOT FOUND: {e}")
-        print("   Pastikan targets.yaml ada di root repo.")
-        return 2
-
-    # Print final summary
-    print("\n" + "=" * 64)
+def _print_summary(summary: dict) -> None:
+    print("=" * 64)
     print("  PIPELINE COMPLETE")
     print("=" * 64)
-    print(f"  Total targets       : {summary.get('total_targets', 0)}")
-    print(f"  Reachable           : {summary.get('reachable', 0)}")
-    print(f"  Qualified leads     : {summary.get('qualified_count', 0)}")
-    print(f"  Output files        : {summary.get('output_files', 0)}")
-    print(f"  Duration            : {summary.get('duration_sec', 0):.1f}s")
-
-    output_paths = summary.get("output_paths", [])
-    if output_paths:
-        print("\n  Generated CSVs:")
-        for p in output_paths:
-            print(f"    - {p}")
-
-    print()
-    return 0 if summary.get("qualified_count", 0) >= 0 else 1
+    print(f"  Total targets       : {summary['total_targets']}")
+    print(f"  Reachable           : {summary['reachable']}")
+    print(f"  Qualified leads     : {summary['qualified']}")
+    print(f"  Output files        : {len(summary['output_files'])}")
+    print(f"  Duration            : {summary['duration_seconds']}s")
+    print("  Generated CSVs:")
+    for f in summary["output_files"]:
+        print(f"    - {f}")
 
 
-def main() -> int:
-    """Sync wrapper for asyncio."""
+async def _main(yaml_path: str) -> int:
     _print_banner()
     _print_env_status()
 
     try:
-        return asyncio.run(_async_main())
+        summary = await run_pipeline(yaml_path)
+    except FileNotFoundError as e:
+        print(f"[ERROR] {e}", file=sys.stderr)
+        return 1
     except KeyboardInterrupt:
-        print("\n[WARN] Interrupted by user")
+        print("\n[ABORTED] User interrupted.", file=sys.stderr)
         return 130
     except Exception as e:  # noqa: BLE001
-        print(f"\n[ERROR] UNEXPECTED: {type(e).__name__}: {e}")
-        print("\n--- Traceback ---")
+        print(f"[FATAL] {type(e).__name__}: {e}", file=sys.stderr)
+        import traceback
         traceback.print_exc()
         return 1
 
+    _print_summary(summary)
+    return 0
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(
+        description="Apex Market Intelligence pipeline"
+    )
+    parser.add_argument(
+        "--targets",
+        default="targets.yaml",
+        help="Path to targets.yaml (default: targets.yaml)",
+    )
+    args = parser.parse_args()
+
+    exit_code = asyncio.run(_main(args.targets))
+    sys.exit(exit_code)
+
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()
