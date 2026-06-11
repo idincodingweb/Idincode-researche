@@ -1,186 +1,257 @@
 # src/enrichers.py
+"""Site fetch + pixel detection + platform detection + PageSpeed enrichment."""
 from __future__ import annotations
-import asyncio
+
 import re
 import time
+from typing import Optional
+
 import httpx
 
-from src.models import FetchResult, PixelSignals, PageSpeedResult
+from src.config import PAGESPEED_API_KEY, PAGESPEED_TIMEOUT, REQUEST_TIMEOUT
+from src.models import FetchResult, PixelSignals
+
+
+_MAX_HTML_BYTES = 2_000_000  # 2MB cap untuk proteksi
+
+_USER_AGENT = (
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 13_5_0) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) "
+    "Chrome/120.0.0.0 Safari/537.36"
+)
+
 
 # ============================================================
-# Fetcher
+# HTTP Fetch (graceful — gak pernah raise)
 # ============================================================
-
-_HEADERS = {
-    "User-Agent": (
-        "Mozilla/5.0 (compatible; ApexIntelBot/1.0; "
-        "Research/Lead-Qualification)"
-    ),
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-    "Accept-Language": "en-US,en;q=0.9",
-}
-
-_MAX_HTML_BYTES = 2_000_000
-
-
 async def fetch_site(
-    client: httpx.AsyncClient,
-    url: str,
+    domain: str,
     *,
-    timeout: float = 15.0,
+    client: httpx.AsyncClient,
 ) -> FetchResult:
-    """Fetch one URL. Never raises."""
-    start = time.perf_counter()
-    try:
-        resp = await client.get(
-            url, headers=_HEADERS, timeout=timeout, follow_redirects=True,
-        )
-        elapsed_ms = int((time.perf_counter() - start) * 1000)
-        html = resp.text[:_MAX_HTML_BYTES]
-        headers = dict(resp.headers)
-        return FetchResult(
-            ok=True,
-            status_code=resp.status_code,
-            html=html,
-            headers=headers,
-            response_ms=elapsed_ms,
-        )
-    except httpx.TimeoutException:
-        elapsed_ms = int((time.perf_counter() - start) * 1000)
-        return FetchResult(ok=False, response_ms=elapsed_ms, error="timeout")
-    except httpx.HTTPError as e:
-        return FetchResult(ok=False, error=f"http_error:{type(e).__name__}")
-    except Exception as e:  # noqa: BLE001
-        return FetchResult(ok=False, error=f"unexpected:{type(e).__name__}")
+    """Fetch HTML dari domain. Coba HTTPS dulu, fallback ke HTTP."""
+    for scheme in ("https", "http"):
+        url = f"{scheme}://{domain}"
+        start = time.perf_counter()
+        try:
+            resp = await client.get(
+                url,
+                follow_redirects=True,
+                timeout=REQUEST_TIMEOUT,
+                headers={"User-Agent": _USER_AGENT},
+            )
+            elapsed_ms = int((time.perf_counter() - start) * 1000)
 
+            # Cap HTML size
+            text = resp.text
+            if len(text.encode("utf-8", errors="ignore")) > _MAX_HTML_BYTES:
+                text = text[:_MAX_HTML_BYTES]
 
-# ============================================================
-# Pixel detection
-# ============================================================
+            return FetchResult(
+                domain=domain,
+                ok=200 <= resp.status_code < 400,
+                status_code=resp.status_code,
+                response_ms=elapsed_ms,
+                html=text,
+                headers={k.lower(): v for k, v in resp.headers.items()},
+                final_url=str(resp.url),
+                error=None,
+            )
+        except (httpx.TimeoutException, httpx.ConnectError, httpx.RemoteProtocolError) as e:
+            elapsed_ms = int((time.perf_counter() - start) * 1000)
+            last_error = f"{type(e).__name__}: {e}"
+            # Coba scheme berikutnya
+            continue
+        except Exception as e:  # noqa: BLE001
+            elapsed_ms = int((time.perf_counter() - start) * 1000)
+            return FetchResult(
+                domain=domain,
+                ok=False,
+                status_code=0,
+                response_ms=elapsed_ms,
+                html="",
+                headers={},
+                final_url=url,
+                error=f"{type(e).__name__}: {e}",
+            )
 
-_META_PATTERNS = [
-    re.compile(r"connect\.facebook\.net/[^/]+/fbevents\.js", re.I),
-    re.compile(r"fbq\s*\(\s*['\"]init['\"]", re.I),
-    re.compile(r"facebook-pixel", re.I),
-]
-_TIKTOK_PATTERNS = [
-    re.compile(r"analytics\.tiktok\.com", re.I),
-    re.compile(r"ttq\.load\s*\(", re.I),
-]
-_GA4_PATTERNS = [
-    re.compile(r"googletagmanager\.com/gtag/js\?id=G-", re.I),
-    re.compile(r"gtag\s*\(\s*['\"]config['\"]\s*,\s*['\"]G-", re.I),
-]
-_GTM_PATTERNS = [
-    re.compile(r"googletagmanager\.com/gtm\.js\?id=GTM-", re.I),
-    re.compile(r"GTM-[A-Z0-9]{4,}", re.I),
-]
-_GOOGLE_ADS_PATTERNS = [
-    re.compile(r"googletagmanager\.com/gtag/js\?id=AW-", re.I),
-    re.compile(r"gtag\s*\(\s*['\"]config['\"]\s*,\s*['\"]AW-", re.I),
-    re.compile(r"googleadservices\.com", re.I),
-]
-
-
-def _any_match(html: str, patterns) -> bool:
-    return any(p.search(html) for p in patterns)
-
-
-def detect_pixels(html: str) -> PixelSignals:
-    if not html:
-        return PixelSignals()
-    return PixelSignals(
-        has_meta=_any_match(html, _META_PATTERNS),
-        has_tiktok=_any_match(html, _TIKTOK_PATTERNS),
-        has_ga4=_any_match(html, _GA4_PATTERNS),
-        has_gtm=_any_match(html, _GTM_PATTERNS),
-        has_google_ads=_any_match(html, _GOOGLE_ADS_PATTERNS),
+    # Kedua scheme gagal
+    return FetchResult(
+        domain=domain,
+        ok=False,
+        status_code=0,
+        response_ms=0,
+        html="",
+        headers={},
+        final_url=f"https://{domain}",
+        error=last_error if 'last_error' in locals() else "Unknown fetch error",
     )
 
 
 # ============================================================
-# Platform / Tech stack detection
+# Pixel Detection (regex-based, lowercase HTML)
 # ============================================================
+_PIXEL_PATTERNS: dict[str, list[re.Pattern[str]]] = {
+    "has_meta_pixel": [
+        re.compile(r"fbq\s*\(\s*['\"]init['\"]", re.IGNORECASE),
+        re.compile(r"connect\.facebook\.net/[^/]+/fbevents\.js", re.IGNORECASE),
+        re.compile(r"facebook\.com/tr\?id=", re.IGNORECASE),
+    ],
+    "has_tiktok_pixel": [
+        re.compile(r"analytics\.tiktok\.com/i18n/pixel", re.IGNORECASE),
+        re.compile(r"ttq\.load\s*\(", re.IGNORECASE),
+    ],
+    "has_ga4": [
+        re.compile(r"gtag\s*\(\s*['\"]config['\"]\s*,\s*['\"]G-[A-Z0-9]+", re.IGNORECASE),
+        re.compile(r"googletagmanager\.com/gtag/js\?id=G-", re.IGNORECASE),
+    ],
+    "has_gtm": [
+        re.compile(r"googletagmanager\.com/gtm\.js\?id=GTM-", re.IGNORECASE),
+        re.compile(r"GTM-[A-Z0-9]{4,}", re.IGNORECASE),
+    ],
+    "has_google_ads": [
+        re.compile(r"gtag\s*\(\s*['\"]config['\"]\s*,\s*['\"]AW-", re.IGNORECASE),
+        re.compile(r"googleadservices\.com/pagead/conversion", re.IGNORECASE),
+    ],
+    "has_hotjar": [
+        re.compile(r"static\.hotjar\.com", re.IGNORECASE),
+        re.compile(r"hjid\s*:\s*\d+", re.IGNORECASE),
+    ],
+    "has_clarity": [
+        re.compile(r"clarity\.ms/tag/", re.IGNORECASE),
+        re.compile(r"clarity\s*\(\s*['\"]set['\"]", re.IGNORECASE),
+    ],
+    "has_linkedin_insight": [
+        re.compile(r"snap\.licdn\.com/li\.lms-analytics", re.IGNORECASE),
+        re.compile(r"_linkedin_partner_id", re.IGNORECASE),
+    ],
+}
 
-def detect_platform(html: str, headers: dict[str, str]) -> str | None:
+
+def detect_pixels(html: str) -> PixelSignals:
+    """Deteksi pixel di HTML. Return PixelSignals."""
+    if not html:
+        return PixelSignals()
+
+    # Lower-case sekali (perf optimization untuk multiple regex)
+    # Tapi kita pake re.IGNORECASE di patterns, jadi gak perlu lowercase.
+
+    signals = PixelSignals()
+    for field_name, patterns in _PIXEL_PATTERNS.items():
+        for pattern in patterns:
+            if pattern.search(html):
+                setattr(signals, field_name, True)
+                break
+
+    return signals
+
+
+# ============================================================
+# Platform Detection
+# ============================================================
+def detect_platform(html: str, headers: dict[str, str]) -> Optional[str]:
+    """Detect CMS / e-commerce platform. Return name atau None."""
     if not html and not headers:
         return None
 
-    h = {k.lower(): v for k, v in headers.items()}
-    html_l = html.lower() if html else ""
+    headers_lower = {k.lower(): v.lower() for k, v in headers.items()}
+    html_lower = html.lower() if html else ""
 
-    if "x-shopify-stage" in h or "x-shopid" in h:
+    # Shopify (header-based paling reliable)
+    if any("shopify" in v for v in headers_lower.values()):
         return "Shopify"
-    if "cdn.shopify.com" in html_l:
+    if "cdn.shopify.com" in html_lower or "shopify.theme" in html_lower:
         return "Shopify"
-    if "wp-content/plugins/woocommerce" in html_l:
+
+    # WooCommerce (cek dulu sebelum WordPress)
+    if "woocommerce" in html_lower or "wp-content/plugins/woocommerce" in html_lower:
         return "WooCommerce"
-    if re.search(r"wp-content/(themes|plugins|uploads)", html_l):
+
+    # WordPress
+    if "wp-content/" in html_lower or "wp-includes/" in html_lower:
         return "WordPress"
-    if "x-powered-by" in h and "wordpress" in h["x-powered-by"].lower():
-        return "WordPress"
-    if "static.wixstatic.com" in html_l:
+    if "generator" in headers_lower.get("x-powered-by", "").lower():
+        if "wordpress" in headers_lower["x-powered-by"].lower():
+            return "WordPress"
+
+    # Wix
+    if "static.wixstatic.com" in html_lower or "wix.com" in html_lower:
         return "Wix"
-    if "squarespace.com" in html_l:
+
+    # Squarespace
+    if "static1.squarespace.com" in html_lower or "squarespace.com" in html_lower:
         return "Squarespace"
-    if "webflow.com" in html_l:
+
+    # Webflow
+    if "assets.website-files.com" in html_lower or "webflow.com" in html_lower:
         return "Webflow"
-    if "x-magento-cache-debug" in h:
+
+    # Magento
+    if "mage/" in html_lower or "magento" in html_lower:
         return "Magento"
+
+    # BigCommerce
+    if "bigcommerce.com" in html_lower or "cdn11.bigcommerce.com" in html_lower:
+        return "BigCommerce"
 
     return None
 
 
 # ============================================================
-# PageSpeed Insights
+# PageSpeed API
 # ============================================================
-
-_PSI_ENDPOINT = "https://www.googleapis.com/pagespeedonline/v5/runPagespeed"
-
-
 async def fetch_pagespeed(
-    client: httpx.AsyncClient,
-    url: str,
+    domain: str,
     *,
-    api_key: str | None,
-    timeout: float = 30.0,
-) -> PageSpeedResult:
-    """Ambil PageSpeed mobile score. Skip kalau no API key."""
-    if not api_key:
-        return PageSpeedResult(available=False, error="no_api_key")
+    client: httpx.AsyncClient,
+) -> dict[str, Optional[float]]:
+    """Fetch PageSpeed Insights mobile metrics. Return dict dengan score/lcp/fid/cls."""
+    empty = {"pagespeed_score": None, "lcp_ms": None, "fid_ms": None, "cls": None}
 
+    if not PAGESPEED_API_KEY:
+        return empty
+
+    url = "https://www.googleapis.com/pagespeedonline/v5/runPagespeed"
     params = {
-        "url": url,
-        "key": api_key,
-        "category": "performance",
+        "url": f"https://{domain}",
+        "key": PAGESPEED_API_KEY,
         "strategy": "mobile",
+        "category": "performance",
     }
+
     try:
-        resp = await client.get(_PSI_ENDPOINT, params=params, timeout=timeout)
+        resp = await client.get(url, params=params, timeout=PAGESPEED_TIMEOUT)
         if resp.status_code != 200:
-            return PageSpeedResult(
-                available=False,
-                error=f"http_{resp.status_code}",
-            )
+            return empty
         data = resp.json()
+    except Exception:  # noqa: BLE001
+        return empty
+
+    try:
         lighthouse = data.get("lighthouseResult", {})
         categories = lighthouse.get("categories", {})
         perf = categories.get("performance", {})
         score = perf.get("score")
-        score_int = int(score * 100) if isinstance(score, (int, float)) else None
+        score_pct = int(round(score * 100)) if isinstance(score, (int, float)) else None
 
-        # LCP
         audits = lighthouse.get("audits", {})
         lcp_audit = audits.get("largest-contentful-paint", {})
         lcp_ms = lcp_audit.get("numericValue")
         lcp_int = int(lcp_ms) if isinstance(lcp_ms, (int, float)) else None
 
-        return PageSpeedResult(
-            available=True,
-            performance_score=score_int,
-            lcp_ms=lcp_int,
-        )
-    except httpx.TimeoutException:
-        return PageSpeedResult(available=False, error="timeout")
-    except Exception as e:  # noqa: BLE001
-        return PageSpeedResult(available=False, error=f"err:{type(e).__name__}")
+        fid_audit = audits.get("max-potential-fid", {})
+        fid_ms = fid_audit.get("numericValue")
+        fid_int = int(fid_ms) if isinstance(fid_ms, (int, float)) else None
+
+        cls_audit = audits.get("cumulative-layout-shift", {})
+        cls_val = cls_audit.get("numericValue")
+        cls_float = float(cls_val) if isinstance(cls_val, (int, float)) else None
+
+        return {
+            "pagespeed_score": score_pct,
+            "lcp_ms": lcp_int,
+            "fid_ms": fid_int,
+            "cls": cls_float,
+        }
+    except Exception:  # noqa: BLE001
+        return empty
