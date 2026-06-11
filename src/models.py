@@ -1,113 +1,60 @@
 # src/models.py
+"""Dataclasses untuk pipeline. Type-safe, self-documenting."""
 from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import Optional
 
 
-@dataclass(slots=True)
-class Target:
-    """Input target dari targets.yaml."""
-    domain: str
-    location: str
-    niche: str
-    category: str
-
-
-@dataclass(slots=True)
-class FetchResult:
-    """Hasil fetch HTML dari domain target."""
-    domain: str
-    ok: bool
-    status_code: int
-    response_ms: int
-    html: str
-    headers: dict[str, str]
-    final_url: str
-    error: Optional[str] = None
-
-
-@dataclass(slots=True)
-class PixelSignals:
-    """Hasil deteksi pixel/tracking di HTML.
-    
-    CATATAN PENTING: Field name HARUS sama dengan EnrichmentResult
-    biar gak ada naming mismatch (bug yang udah pernah kejadian).
-    """
-    has_meta_pixel: bool = False
-    has_tiktok_pixel: bool = False  # ← UDAH FIX (sebelumnya: has_tiktok)
-    has_ga4: bool = False
-    has_gtm: bool = False
-    has_google_ads: bool = False
-    has_hotjar: bool = False
-    has_clarity: bool = False
-    has_linkedin_insight: bool = False
-
-
-@dataclass(slots=True)
+@dataclass
 class EnrichmentResult:
-    """Hasil lengkap enrichment per domain."""
+    """Raw enrichment data per domain (sebelum scoring)."""
     domain: str
-    location: str
+    location: Optional[str]
     niche: str
-    category: str
+    category: Optional[str]
 
     # Reachability
-    reachable: bool = False
-    response_ms: Optional[int] = None
-    status_code: Optional[int] = None
-
-    # Platform detection
-    platform: Optional[str] = None
-
-    # Pixel signals (in HTML) — naming sekarang konsisten dengan PixelSignals
-    has_meta_pixel: bool = False
-    has_tiktok_pixel: bool = False
-    has_ga4: bool = False
-    has_gtm: bool = False
-    has_google_ads: bool = False
-    has_hotjar: bool = False
-    has_clarity: bool = False
-    has_linkedin_insight: bool = False
-
-    # PageSpeed metrics
-    pagespeed_score: Optional[int] = None
-    lcp_ms: Optional[int] = None
-    fid_ms: Optional[int] = None
-    cls: Optional[float] = None
-
-    # Errors (untuk debugging)
-    errors: list[str] = field(default_factory=list)
-
-
-@dataclass(slots=True)
-class QualifiedLead:
-    """Lead final dengan score + AI-generated narasi."""
-    # Identitas
-    domain: str
-    location: str
-    niche: str
-    category: str
-
-    # Score
-    score: float
-    rank: int = 0
+    reachable: bool
+    fail_reason: Optional[str]  # "connect_timeout", "HTTP 404", dll
+    response_ms: Optional[int]
+    status_code: Optional[int]
 
     # Platform
-    platform: Optional[str] = None
+    platform: Optional[str]
 
-    # Pixel boolean (untuk export CSV)
-    meta_pixel_in_html: bool = False
-    tiktok_pixel_in_html: bool = False
-    ga4_in_html: bool = False
-    gtm_in_html: bool = False
-    google_ads_in_html: bool = False
+    # Pixels (from HTML)
+    has_meta_pixel: bool
+    has_tiktok_pixel: bool
+    has_ga4: bool
+    has_gtm: bool
+    has_google_ads: bool
 
-    # Performance
-    pagespeed_score: Optional[int] = None
-    lcp_ms: Optional[int] = None
-    response_ms: Optional[int] = None
+    # Performance (from PageSpeed API)
+    pagespeed_score: Optional[int]  # 0-100
+    lcp_ms: Optional[int]
 
-    # AI narasi (diisi oleh analyst.py)
+
+@dataclass
+class QualifiedLead:
+    """Scored lead, siap di-enrich AI & export."""
+    domain: str
+    location: Optional[str]
+    niche: str
+    category: Optional[str]
+    score: float  # 0.0 - 1.0
+
+    platform: Optional[str]
+    meta_pixel_in_html: bool
+    tiktok_pixel_in_html: bool
+    ga4_in_html: bool
+    gtm_in_html: bool
+    google_ads_in_html: bool
+
+    pagespeed_score: Optional[int]
+    lcp_ms: Optional[int]
+    response_ms: Optional[int]
+
+    # AI-generated (filled by analyst.py)
     gold_reasons: str = ""
     outreach_angle: str = ""
