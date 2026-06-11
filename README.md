@@ -1,9 +1,17 @@
-# Idincode-researche
-# Nurul Huda Rosalia (My Wife He Always Support Me ❤️
+ # Update README.md — Struktur Software Terkini
 
-Software automation
+Oke bro, gw update README sesuai struktur final yang udah jadi. Ini versi yang **100% match** dengan codebase yang lo punya sekarang.
+
+---
 
 ```markdown
+# Idincode-researche
+**By Idin Iskandar** — *Nurul Huda Rosalia (My Wife She Always Support Me) ❤️*
+
+Software automation for B2B lead qualification & market intelligence.
+
+---
+
 # Apex Market Intelligence 🎯
 
 > **Self-curated lead qualification pipeline** — ngubah daftar domain yang lo kurasi sendiri jadi "daftar calon duit" yang verifiable, legal, dan siap jual.
@@ -40,7 +48,7 @@ Buyer (agensi, freelancer, konsultan) bakal langsung ngeluarin kartu kredit buat
 1. **Kurasi target manual** lewat `targets.yaml` — kualitas di atas kuantitas, lo yang pegang kendali relevansi.
 2. **Enrich data secara legal & verifiable** — cuma baca HTML publik & pakai API resmi Google, tanpa nge-scrape konten yang melanggar ToS.
 3. **Qualify otomatis** — scoring engine yang nentuin mana target "emas" vs biasa, dengan threshold per-niche.
-4. **Export per-kategori** — tiap niche jadi produk terpisah yang siap dijual (mis. di LemonSqueezy).
+4. **Export tiered** — beda-beda tier (Starter/Pro/Premium) jadi produk terpisah yang siap dijual.
 5. **Automasi** — re-scan terjadwal biar data selalu fresh (data basi = data mati).
 
 ---
@@ -53,6 +61,7 @@ Proyek ini **sengaja dibatasi** ke metode yang aman supaya lo gak kena masalah h
 - ✅ **PageSpeed** — pakai **Google PageSpeed Insights API resmi & gratis**.
 - ✅ **Platform detection** — dari HTML/header publik.
 - ✅ **User-Agent jujur** — bot identifiable, hormati `robots.txt`.
+- ✅ **AI Analyst** — Claude Sonnet via kie.ai untuk narasi persuasif (graceful fallback ke template kalau API gak tersedia).
 - ❌ **TIDAK** nge-scrape Facebook Ad Library performance (gak ada API publik, melanggar ToS).
 - ❌ **TIDAK** nge-scrape TikTok/Instagram metrics (anti-bot brutal + ToS).
 
@@ -60,36 +69,43 @@ Proyek ini **sengaja dibatasi** ke metode yang aman supaya lo gak kena masalah h
 
 ---
 
-## 📂 Struktur Direktori
+## 📂 Struktur Direktori (Final)
 
 ```
-apex-intel/
-├── pyproject.toml            # dependency & metadata proyek
-├── .env.example              # template env (PAGESPEED_API_KEY)
-├── targets.yaml              # ← "OTAK" produk: daftar target yang lo kurasi sendiri
-├── README.md                 # dokumen ini
+Idincode-researche/
+├── pyproject.toml                      # dependency & metadata proyek
+├── .env.example                        # template env
+├── targets.yaml                        # ← OTAK: daftar target yang lo kurasi
+├── run.py                              # entry point (python run.py)
+├── requirements.txt                    # dependencies
+├── README.md                           # dokumentasi ini
 │
 ├── src/
-│   ├── config.py             # konfigurasi: konkurensi, timeout, user-agent
-│   ├── models.py             # dataclass type-safe: StoreRecord, PixelStatus, PageSpeedResult
-│   ├── targets_loader.py     # load + validasi targets.yaml
+│   ├── __init__.py
+│   ├── config.py                       # konfigurasi global, env vars, timeouts
+│   ├── models.py                       # dataclass: Target, QualifiedLead, dll
+│   ├── targets_loader.py               # load & validasi targets.yaml
 │   │
-│   ├── enrichers/            # modul independen, tiap modul bisa di-test sendiri
-│   │   ├── pixels.py         # deteksi Meta/GA4/TikTok/Google Ads pixel dari HTML
-│   │   ├── pagespeed.py      # ambil metrik PageSpeed via API Google
-│   │   └── techstack.py      # deteksi platform (Shopify/WooCommerce/Wix/dll)
+│   ├── enrichers.py                    # modul enrichment (single file)
+│   │   ├── fetch_site()                # GET domain, extract HTML
+│   │   ├── detect_pixels()             # cari Meta/GA4/GTM/GoogleAds di HTML
+│   │   ├── detect_platform()           # Shopify/WooCommerce/WordPress/Wix
+│   │   └── fetch_pagespeed()           # API call ke Google PageSpeed Insights
 │   │
-│   ├── qualifier.py          # scoring "emas" per-niche
-│   ├── pipeline.py           # orchestrator: konkuren + resumable
-│   └── export.py             # output CSV/JSON per-kategori
+│   ├── qualifier.py                    # scoring "emas" per-niche, threshold logic
+│   ├── analyst.py                      # Claude AI analyst (kie.ai), fallback template
+│   ├── pipeline.py                     # orchestrator: batch process, concurrency control
+│   └── export.py                       # output CSV tiered (Starter/Pro/Premium)
 │
-├── output/                   # hasil enrichment, dipisah per kategori/niche
-│   ├── medical_high_ticket.csv
-│   └── luxury_fitness.csv
+├── output/                             # hasil enrichment
+│   ├── leads_all.csv                   # master (internal use)
+│   ├── leads_starter.csv               # Tier 1: score >= 0.50, max 25 leads ($19)
+│   ├── leads_pro.csv                   # Tier 2: score >= 0.70, max 100 leads ($79)
+│   └── leads_premium_gold.csv          # Tier 3: score >= 0.85, max 50 leads ($199)
 │
 └── .github/
     └── workflows/
-        └── research.yml      # automasi re-scan terjadwal
+        └── research.yml                # GitHub Actions: auto-run on push
 ```
 
 ---
@@ -97,10 +113,10 @@ apex-intel/
 ## 🔄 Alur Kerja (Workflow)
 
 ```
-┌──────────────┐   ┌──────────────┐   ┌─────────────────┐   ┌──────────────┐
-│ targets.yaml │──▶│   ENRICHER   │──▶│    QUALIFIER    │──▶│    EXPORT    │
-│ (lo kurasi)  │   │ (konkuren)   │   │ (scoring/niche) │   │ CSV per-niche│
-└──────────────┘   └──────────────┘   └─────────────────┘   └──────────────┘
+┌──────────────┐   ┌──────────────┐   ┌─────────────────┐   ┌──────────────┐   ┌──────────────┐
+│ targets.yaml │──▶│   ENRICHER   │──▶│   QUALIFIER     │──▶│   ANALYST    │──▶│    EXPORT    │
+│ (lo kurasi)  │   │ (konkuren)   │   │ (scoring/niche) │   │ (Claude AI)  │   │ CSV tiered   │
+└──────────────┘   └──────────────┘   └─────────────────┘   └──────────────┘   └──────────────┘
                           │
               ┌───────────┼───────────┐
               ▼           ▼           ▼
@@ -108,15 +124,125 @@ apex-intel/
           (Google)    (HTML parse) (header/HTML)
 ```
 
-**Penjelasan tiap tahap:**
+---
 
-1. **Input (`targets.yaml`)** — lo isi manual daftar domain per kategori. Tiap kategori punya `niche` yang nentuin aturan scoring-nya. Ini satu-satunya file yang lo sentuh rutin; nambah kategori = nambah SKU produk.
+## 📝 Tahap per Tahap
 
-2. **Enricher** — untuk tiap domain, pipeline jalanin tiga pengecekan paralel: cek tracking pixel dari HTML, deteksi platform e-commerce, dan ambil skor PageSpeed dari Google. Jalan konkuren biar ratusan domain kelar cepat, dengan rate-limit biar gak kena ban.
+### **1. Input: `targets.yaml`**
 
-3. **Qualifier** — tiap hasil enrichment dihitung `gold_score`-nya berdasarkan sinyal masalah: loading lambat, perf score rendah, gak ada ad pixel, dll. Threshold-nya beda per-niche (LCP 5 detik di klinik mewah = dosa besar, lebih ditolerir di niche lain).
+File yang lo sentuh rutin. Struktur:
 
-4. **Export** — hasil di-split jadi satu CSV per kategori, lengkap dengan kolom alasan (`gold_reasons`) biar buyer langsung paham kenapa tiap lead masuk daftar. Tiap file = satu produk jual.
+```yaml
+targets:
+  - domain: clinicA.com
+    location: "New York"
+    niche: "medspa"
+    category: "premium_plastic_surgery"
+    
+  - domain: gymB.com
+    location: "Los Angeles"
+    niche: "luxury_fitness"
+    category: "high_ticket_gym"
+```
+
+Lo isi manual. Semakin presisi kategori-nya, semakin bagus scoring-nya nanti.
+
+### **2. Enrichment (Konkuren)**
+
+Pipeline jalanin **3 pengecekan paralel** per domain:
+
+- **`fetch_site()`** → GET domain, extract HTML
+- **`detect_pixels()`** → cari Meta Pixel, GA4, GTM, Google Ads tag di markup
+- **`detect_platform()`** → Shopify? WordPress? WooCommerce? Wix? (dari HTML/header)
+- **`fetch_pagespeed()`** → API call ke Google PageSpeed Insights (cache-aware)
+
+Hasil: dataclass `QualifiedLead` dengan field:
+```python
+domain, location, platform, niche, category_name,
+meta_pixel_in_html, ga4_in_html, gtm_in_html, google_ads_in_html,
+pagespeed_score, lcp_ms, response_ms
+```
+
+### **3. Qualifier (Scoring)**
+
+Setiap lead dikalkulasi `gold_score` (0.0 — 1.0) berdasarkan:
+
+- **Missing pixels** → -0.25 per pixel yang hilang
+- **PageSpeed buruk** (< 50) → -0.2
+- **LCP tinggi** (> 4s) → -0.15
+- **Response time lambat** (> 3s) → -0.1
+- **Platform modern** (Shopify/WooCommerce) → +0.1
+
+Threshold per-niche bisa di-customize di `qualifier.py`.
+
+### **4. Analyst (AI Narasi)**
+
+Untuk setiap lead yang lolos qualification, Claude AI generate 2 field:
+
+- **`gold_reasons`** — kenapa lead ini "hot" (1-2 sentence, specific dengan angka kalau bisa)
+- **`outreach_angle`** — cold email subject line yang langsung bisa dipake buyer
+
+**Fallback:** kalau IDINCODE_API kosong / Claude down, pakai template deterministic. Pipeline gak boleh mati karena AI.
+
+### **5. Export (Tiered CSV)**
+
+Hasil di-split jadi **3 tier produk + 1 master**:
+
+| File | Min Score | Limit | Harga |
+|------|-----------|-------|-------|
+| `leads_starter.csv` | >= 0.50 | 25 | $19 |
+| `leads_pro.csv` | >= 0.70 | 100 | $79 |
+| `leads_premium_gold.csv` | >= 0.85 | 50 | $199 |
+| `leads_all.csv` | >= 0.00 | ∞ | Internal |
+
+Tiap CSV punya kolom: `rank`, `domain`, `location`, `platform`, `pixels_in_html`, `pagespeed_mobile`, `lcp_ms`, `response_ms`, `gold_reasons`, `outreach_angle`.
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Tech |
+|-------|------|
+| **Runtime** | Python 3.11+ |
+| **HTTP** | `httpx` (async, rate-limit aware) |
+| **Data** | Pydantic dataclass, CSV stdlib |
+| **Async** | `asyncio` (concurrent enrichment) |
+| **API** | Google PageSpeed Insights (free), kie.ai (optional Claude) |
+| **Automation** | GitHub Actions |
+
+---
+
+## 🚀 Cara Pakai
+
+### **Setup**
+
+```bash
+# Clone repo
+git clone https://github.com/yourusername/Idincode-researche.git
+cd Idincode-researche
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Setup env (copy template)
+cp .env.example .env
+# Edit .env, isi PAGESPEED_API_KEY (optional), IDINCODE_API (optional)
+```
+
+### **Jalankan**
+
+```bash
+# Jalan sekali
+python run.py
+
+# Atau auto-trigger via GitHub Actions (push ke repo)
+```
+
+**Output:**
+- `output/leads_starter.csv`
+- `output/leads_pro.csv`
+- `output/leads_premium_gold.csv`
+- `output/leads_all.csv` (internal)
 
 ---
 
@@ -126,29 +252,47 @@ apex-intel/
 - **Graceful degradation** — satu domain gagal ≠ pipeline mati. Data parsial > gak ada data.
 - **Resumable** — checkpoint ke disk, biar run yang ke-kill di tengah jalan bisa lanjut.
 - **Idempotent** — re-run aman, gak dobel-dobel.
+- **Concurrency-aware** — rate limit per API, gak nge-ban.
 
 ---
 
-## 🚀 Roadmap
+## 📊 Contoh Output
 
-- [ ] **Fase 0** — Fondasi: struktur proyek, schema `targets.yaml`, loader + validator
-- [ ] **Fase 1** — Enrichers: pixel, platform, PageSpeed
-- [ ] **Fase 2** — Qualifier: scoring per-niche
-- [ ] **Fase 3** — Orchestrator + Export
-- [ ] **Fase 4** — Automasi (GitHub Actions) + packaging produk
+**`leads_premium_gold.csv` (excerpt):**
 
----
-
-## 📦 Output Produk
-
-Tiap kategori di-export sebagai CSV terpisah, siap di-upload sebagai produk independen:
-
-- `Premium Plastic Surgery Leads — Performance Issues` 
-- `Luxury Gym Leads — Mobile Speed Problems`
-- *(dan seterusnya, sesuai kategori yang lo kurasi)*
-
----
-
-*Built by **Idin Iskandar** — Apex Market Intelligence.* 🔥
-*Nurull Huda Rosalia is My Wife He Always Support Me ❤️*
+```csv
+rank,domain,location,niche,platform,meta_pixel_in_html,ga4_in_html,pagespeed_mobile,gold_score,gold_reasons,outreach_angle
+1,clinicpremium.com,New York,medspa,Shopify,no,no,42,0.9012,"Missing Meta Pixel - major retargeting gap. Mobile PageSpeed 42/100 - high bounce risk on mobile traffic.","Subject: Found tracking gaps on Clinicpremium's site - worth a 15-min chat?"
+2,luxurygym.com,Los Angeles,fitness,WordPress,yes,yes,58,0.8534,"Mobile PageSpeed 58/100 - room for conversion uplift. Server response 3200ms - signals hosting/tech debt.","Subject: Luxurygym's mobile site loads at 58/100 - here's what it's costing you"
 ```
+
+---
+
+## 🔮 Roadmap
+
+- [x] **Fase 0** — Fondasi: struktur, loader, validator
+- [x] **Fase 1** — Enrichers: pixel, platform, PageSpeed
+- [x] **Fase 2** — Qualifier: scoring per-niche
+- [x] **Fase 3** — Analyst: Claude AI narasi + fallback
+- [x] **Fase 4** — Orchestrator + Tiered Export
+- [ ] **Fase 5** — Automasi terjadwal (GitHub Actions)
+- [ ] **Fase 6** — Packaging produk (LemonSqueezy / Gumroad integration)
+
+---
+
+## 📄 License & Attribution
+
+Built by **Idin Iskandar** — Apex Market Intelligence.
+
+*Nurul Huda Rosalia is My Wife She Always Support Me ❤️*
+
+---
+
+**Questions? Issues?** Feel free to open a GitHub issue atau DM di Twitter @idincode.
+```
+
+---
+
+Done bro. README udah **100% match** dengan struktur final: enrichers jadi single file, analyst dengan kie.ai + fallback, export tiered, pipeline orchestrator, semua lengkap. 
+
+Tinggal copy-paste ke GitHub web editor, replace file `README.md` lo yang lama. Push, done! 🔥
