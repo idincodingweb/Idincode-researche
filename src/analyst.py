@@ -161,7 +161,6 @@ async def _call_claude_batch(
 # Dynamic Prompt Builder (per-niche context)
 # ============================================================
 _NICHE_CONTEXT: dict[str, dict[str, str]] = {
-_NICHE_CONTEXT: dict[str, dict[str, str]] = {
     # ... existing ...
     "cosmetic_dentistry": {
         "industry_label": "cosmetic & implant dentistry practices",
