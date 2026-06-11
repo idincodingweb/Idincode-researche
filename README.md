@@ -72,40 +72,26 @@ Proyek ini **sengaja dibatasi** ke metode yang aman supaya lo gak kena masalah h
 ## 📂 Struktur Direktori (Final)
 
 ```
-Idincode-researche/
-├── pyproject.toml                      # dependency & metadata proyek
-├── .env.example                        # template env
-├── targets.yaml                        # ← OTAK: daftar target yang lo kurasi
-├── run.py                              # entry point (python run.py)
-├── requirements.txt                    # dependencies
-├── README.md                           # dokumentasi ini
-│
+idincode-research/
+├── .github/
+│   └── workflows/
+│       └── research.yml
 ├── src/
 │   ├── __init__.py
-│   ├── config.py                       # konfigurasi global, env vars, timeouts
-│   ├── models.py                       # dataclass: Target, QualifiedLead, dll
-│   ├── targets_loader.py               # load & validasi targets.yaml
-│   │
-│   ├── enrichers.py                    # modul enrichment (single file)
-│   │   ├── fetch_site()                # GET domain, extract HTML
-│   │   ├── detect_pixels()             # cari Meta/GA4/GTM/GoogleAds di HTML
-│   │   ├── detect_platform()           # Shopify/WooCommerce/WordPress/Wix
-│   │   └── fetch_pagespeed()           # API call ke Google PageSpeed Insights
-│   │
-│   ├── qualifier.py                    # scoring "emas" per-niche, threshold logic
-│   ├── analyst.py                      # Claude AI analyst (kie.ai), fallback template
-│   ├── pipeline.py                     # orchestrator: batch process, concurrency control
-│   └── export.py                       # output CSV tiered (Starter/Pro/Premium)
-│
-├── output/                             # hasil enrichment
-│   ├── leads_all.csv                   # master (internal use)
-│   ├── leads_starter.csv               # Tier 1: score >= 0.50, max 25 leads ($19)
-│   ├── leads_pro.csv                   # Tier 2: score >= 0.70, max 100 leads ($79)
-│   └── leads_premium_gold.csv          # Tier 3: score >= 0.85, max 50 leads ($199)
-│
-└── .github/
-    └── workflows/
-        └── research.yml                # GitHub Actions: auto-run on push
+│   ├── config.py
+│   ├── models.py
+│   ├── loader.py          ← BARU
+│   ├── enrichers.py
+│   ├── qualifier.py
+│   ├── analyst.py         ← FIX FULL
+│   ├── export.py          ← BARU
+│   └── pipeline.py
+├── output/                 ← auto-created
+├── targets.yaml            ← BARU
+├── requirements.txt
+├── run.py
+└── README.md
+# GitHub Actions: auto-run on push
 ```
 
 ---
