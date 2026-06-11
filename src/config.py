@@ -21,10 +21,19 @@ PAGESPEED_API_KEY: str | None = os.getenv("PAGESPEED_API_KEY") or None
 IDINCODE_API: str | None = os.getenv("IDINCODE_API") or None
 
 # ============================================================
-# Kie.ai endpoint (OpenAI-compatible Claude proxy)
+# Kie.ai endpoint (Anthropic-native style dengan prefix /claude/)
+# CATATAN: Endpoint kie.ai BUKAN OpenAI-compatible.
+# Path-nya kustom: /claude/v1/messages (bukan /v1/messages atau /v1/chat/completions)
 # ============================================================
-KIE_AI_BASE_URL: str = "https://api.kie.ai/v1"
-KIE_AI_MODEL: str = "claude-sonnet-4-5-20250929"
+KIE_AI_BASE_URL: str = "https://api.kie.ai"
+KIE_AI_MESSAGES_PATH: str = "/claude/v1/messages"
+
+# Model name sesuai naming kie.ai (tanpa suffix tanggal)
+# Kalau model ini gak available, coba: claude-haiku-4-5, claude-sonnet-4, dll
+KIE_AI_MODEL: str = "claude-sonnet-4-5"
+
+# Extended thinking: false untuk batch processing (speed > deep reasoning)
+KIE_AI_THINKING: bool = False
 
 # ============================================================
 # Output
@@ -32,7 +41,7 @@ KIE_AI_MODEL: str = "claude-sonnet-4-5-20250929"
 OUTPUT_DIR: str = "output"
 
 # ============================================================
-# Export Tiering (jangan diturunin tanpa alasan bisnis kuat!)
+# Export Tiering
 # ============================================================
 TIER_CONFIGS: list[dict] = [
     {
