@@ -1,24 +1,15 @@
 # src/analyst.py
-&quot;&quot;&quot;
+"""
 Claude AI Analyst Layer (via kie.ai)
 
 Tugas modul ini: ngubah data mentah enrichment jadi narasi yang JUAL.
 
-Contoh transformasi:
-  INPUT  : meta_pixel=False, ga4=True, pagespeed=42, response_ms=3200
-  OUTPUT :
-    gold_reasons    = &quot;Klinik premium tanpa Meta Pixel — kehilangan retargeting
-                       audience worth ~$8K/bulan. Mobile speed 42 = bounce rate
-                       tinggi di iPhone user (target demografi mereka).&quot;
-    outreach_angle  = &quot;Subject: Found 3 tracking gaps in [clinic name]&apos;s funnel —
-                       worth a quick chat?&quot;
-
 Design choices:
-  - Single batch call (semua lead dalam 1 request) -&gt; hemat token &amp; cepat
+  - Single batch call (semua lead dalam 1 request) untuk hemat token & cepat
   - Graceful degradation: kalo API key kosong / kie.ai down, fallback ke
     template reasoning deterministic (pipeline gak boleh mati gara-gara ini)
-  - Structured JSON output dari Claude -&gt; parsing reliable
-&quot;&quot;&quot;
+  - Structured JSON output dari Claude untuk parsing reliable
+"""
 from __future__ import annotations
 import asyncio
 import json
@@ -43,29 +34,29 @@ async def enrich_with_ai_analyst(
     leads: list[QualifiedLead],
     *,
     max_retries: int = 2,
-) -&gt; list[QualifiedLead]:
-    &quot;&quot;&quot;
+) -> list[QualifiedLead]:
+    """
     Enrich SEMUA leads dengan AI-generated gold_reasons + outreach_angle.
 
     Strategy:
-      - Kalo IDINCODE_API gak ada -&gt; pakai fallback template (deterministic)
-      - Kalo ada -&gt; batch call ke kie.ai, parse JSON response
-      - Kalo Claude gagal/timeout -&gt; fallback ke template per-lead
-    &quot;&quot;&quot;
+      - Kalo IDINCODE_API gak ada -> pakai fallback template (deterministic)
+      - Kalo ada -> batch call ke kie.ai, parse JSON response
+      - Kalo Claude gagal/timeout -> fallback ke template per-lead
+    """
     if not leads:
         return leads
 
-    # No API key -&gt; fallback langsung
+    # No API key -> fallback langsung
     if not IDINCODE_API:
-        print(&quot;[analyst] IDINCODE_API kosong, pakai fallback template&quot;)
+        print("[analyst] IDINCODE_API kosong, pakai fallback template")
         return _apply_fallback_to_all(leads)
 
-    print(f&quot;[analyst] Generating AI reasoning untuk {len(leads)} leads via kie.ai...&quot;)
+    print(f"[analyst] Generating AI reasoning untuk {len(leads)} leads via kie.ai...")
 
     try:
         ai_results = await _call_claude_batch(leads, max_retries=max_retries)
     except Exception as e:  # noqa: BLE001
-        print(f&quot;[analyst] ⚠️  Claude call failed ({type(e).__name__}: {e}), pakai fallback&quot;)
+        print(f"[analyst] WARN: Claude call failed ({type(e).__name__}: {e}), pakai fallback")
         return _apply_fallback_to_all(leads)
 
     # Merge AI output ke leads
@@ -73,15 +64,15 @@ async def enrich_with_ai_analyst(
     for lead in leads:
         ai_data = ai_results.get(lead.domain)
         if ai_data and isinstance(ai_data, dict):
-            lead.gold_reasons = ai_data.get(&quot;gold_reasons&quot;) or _fallback_reasons(lead)
-            lead.outreach_angle = ai_data.get(&quot;outreach_angle&quot;) or _fallback_outreach(lead)
+            lead.gold_reasons = ai_data.get("gold_reasons") or _fallback_reasons(lead)
+            lead.outreach_angle = ai_data.get("outreach_angle") or _fallback_outreach(lead)
         else:
-            # Lead ini gak ke-cover di response Claude -&gt; fallback
+            # Lead ini gak ke-cover di response Claude -> fallback
             lead.gold_reasons = _fallback_reasons(lead)
             lead.outreach_angle = _fallback_outreach(lead)
         enriched.append(lead)
 
-    print(f&quot;[analyst] ✅ AI reasoning generated untuk {len(enriched)} leads&quot;)
+    print(f"[analyst] OK: AI reasoning generated untuk {len(enriched)} leads")
     return enriched
 
 
@@ -93,29 +84,29 @@ async def _call_claude_batch(
     leads: list[QualifiedLead],
     *,
     max_retries: int,
-) -&gt; dict[str, dict[str, str]]:
-    &quot;&quot;&quot;
+) -> dict[str, dict[str, str]]:
+    """
     Kirim semua lead dalam 1 request, return dict {domain: {gold_reasons, outreach_angle}}.
-    &quot;&quot;&quot;
+    """
     system_prompt = _build_system_prompt()
     user_prompt = _build_user_prompt(leads)
 
     payload = {
-        &quot;model&quot;: KIE_AI_MODEL,
-        &quot;max_tokens&quot;: 4000,
-        &quot;temperature&quot;: 0.4,
-        &quot;messages&quot;: [
-            {&quot;role&quot;: &quot;system&quot;, &quot;content&quot;: system_prompt},
-            {&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: user_prompt},
+        "model": KIE_AI_MODEL,
+        "max_tokens": 4000,
+        "temperature": 0.4,
+        "messages": [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
         ],
     }
 
     headers = {
-        &quot;Authorization&quot;: f&quot;Bearer {IDINCODE_API}&quot;,
-        &quot;Content-Type&quot;: &quot;application/json&quot;,
+        "Authorization": f"Bearer {IDINCODE_API}",
+        "Content-Type": "application/json",
     }
 
-    url = f&quot;{KIE_AI_BASE_URL.rstrip(&apos;/&apos;)}/chat/completions&quot;
+    url = f"{KIE_AI_BASE_URL.rstrip('/')}/chat/completions"
 
     last_error: Exception | None = None
     for attempt in range(max_retries + 1):
@@ -129,133 +120,210 @@ async def _call_claude_batch(
                 parsed = _parse_json_response(text)
                 if parsed:
                     return parsed
-                raise ValueError(&quot;Empty or invalid JSON from Claude&quot;)
+                raise ValueError("Empty or invalid JSON from Claude")
 
-            # Rate limit / server error -&gt; retry
+            # Rate limit / server error -> retry
             if resp.status_code in (429, 500, 502, 503, 504):
-                last_error = RuntimeError(f&quot;HTTP {resp.status_code}: {resp.text[:200]}&quot;)
-                if attempt &lt; max_retries:
+                last_error = RuntimeError(f"HTTP {resp.status_code}: {resp.text[:200]}")
+                if attempt < max_retries:
                     wait = 2 ** attempt
-                    print(f&quot;[analyst] HTTP {resp.status_code}, retry in {wait}s...&quot;)
+                    print(f"[analyst] HTTP {resp.status_code}, retry in {wait}s...")
                     await asyncio.sleep(wait)
                     continue
                 raise last_error
 
-            # Client error (4xx) -&gt; no retry
-            raise RuntimeError(f&quot;HTTP {resp.status_code}: {resp.text[:200]}&quot;)
+            # Client error (4xx) -> no retry
+            raise RuntimeError(f"HTTP {resp.status_code}: {resp.text[:200]}")
 
         except httpx.TimeoutException as e:
             last_error = e
-            if attempt &lt; max_retries:
+            if attempt < max_retries:
                 wait = 2 ** attempt
-                print(f&quot;[analyst] Timeout, retry in {wait}s...&quot;)
+                print(f"[analyst] Timeout, retry in {wait}s...")
                 await asyncio.sleep(wait)
                 continue
             raise
 
     if last_error:
         raise last_error
-    raise RuntimeError(&quot;Unknown error in _call_claude_batch&quot;)
+    raise RuntimeError("Unknown error in _call_claude_batch")
 
 
 # ============================================================
 # Prompt builders
 # ============================================================
 
-def _build_system_prompt() -&gt; str:
+def _build_system_prompt() -> str:
     return (
-        &quot;You are an expert B2B sales analyst specializing in healthcare/medspa &quot;
-        &quot;digital marketing. You analyze website tracking infrastructure &amp; performance &quot;
-        &quot;data to identify SALES OPPORTUNITIES for marketing agencies.\n\n&quot;
-        &quot;Your output is used by agencies to cold-pitch services to plastic surgery &quot;
-        &quot;clinics. Be SPECIFIC, ACTIONABLE, and slightly URGENT.\n\n&quot;
-        &quot;Rules:\n&quot;
-        &quot;1. Output ONLY valid JSON. No markdown fences, no preamble.\n&quot;
-        &quot;2. For each domain, generate:\n&quot;
-        &quot;   - gold_reasons (1-2 sentences): WHY this is a hot lead. Mention &quot;
-        &quot;     specific dollar impact when possible (e.g. &apos;losing ~$8K/mo from &quot;
-        &quot;     missed retargeting&apos;).\n&quot;
-        &quot;   - outreach_angle (1 sentence): A cold email subject line OR opening &quot;
-        &quot;     hook that an agency could use immediately.\n&quot;
-        &quot;3. Tone: confident, data-driven, no fluff.\n&quot;
-        &quot;4. If a clinic already has good infra (all pixels + fast site), say &quot;
-        &quot;   &apos;limited opportunity&apos; honestly — don&apos;t fabricate problems.\n&quot;
-        &quot;5. Response format MUST be exactly:\n&quot;
-        &quot;{\n&quot;
-        &apos;  &quot;results&quot;: {\n&apos;
-        &apos;    &quot;domain1.com&quot;: {&quot;gold_reasons&quot;: &quot;...&quot;, &quot;outreach_angle&quot;: &quot;...&quot;},\n&apos;
-        &apos;    &quot;domain2.com&quot;: {&quot;gold_reasons&quot;: &quot;...&quot;, &quot;outreach_angle&quot;: &quot;...&quot;}\n&apos;
-        &quot;  }\n&quot;
-        &quot;}&quot;
+        "You are an expert B2B sales analyst specializing in healthcare/medspa "
+        "digital marketing. You analyze website tracking infrastructure & performance "
+        "data to identify SALES OPPORTUNITIES for marketing agencies.\n\n"
+        "Your output is used by agencies to cold-pitch services to plastic surgery "
+        "clinics. Be SPECIFIC, ACTIONABLE, and slightly URGENT.\n\n"
+        "Rules:\n"
+        "1. Output ONLY valid JSON. No markdown fences, no preamble.\n"
+        "2. For each domain, generate:\n"
+        "   - gold_reasons (1-2 sentences): WHY this is a hot lead. Mention "
+        "     specific dollar impact when possible (e.g. 'losing ~$8K/mo from "
+        "     missed retargeting').\n"
+        "   - outreach_angle (1 sentence): A cold email subject line OR opening "
+        "     hook that an agency could use immediately.\n"
+        "3. Tone: confident, data-driven, no fluff.\n"
+        "4. If a clinic already has good infra (all pixels + fast site), say "
+        "   'limited opportunity' honestly - don't fabricate problems.\n"
+        "5. Response format MUST be exactly:\n"
+        "{\n"
+        '  "results": {\n'
+        '    "domain1.com": {"gold_reasons": "...", "outreach_angle": "..."},\n'
+        '    "domain2.com": {"gold_reasons": "...", "outreach_angle": "..."}\n'
+        "  }\n"
+        "}"
     )
 
 
-def _build_user_prompt(leads: list[QualifiedLead]) -&gt; str:
-    &quot;&quot;&quot;Compact lead data jadi tabel ringkas yang Claude bisa cerna.&quot;&quot;&quot;
+def _build_user_prompt(leads: list[QualifiedLead]) -> str:
+    """Compact lead data jadi tabel ringkas yang Claude bisa cerna."""
     lines = [
-        &quot;Analyze these plastic surgery clinics. For each, generate gold_reasons &quot;
-        &quot;&amp; outreach_angle. Return JSON only.\n&quot;,
-        &quot;Data per clinic:&quot;,
+        "Analyze these plastic surgery clinics. For each, generate gold_reasons "
+        "& outreach_angle. Return JSON only.\n",
+        "Data per clinic:",
     ]
 
     for lead in leads:
         pixels = []
         if lead.meta_pixel_in_html:
-            pixels.append(&quot;Meta&quot;)
+            pixels.append("Meta")
         if lead.ga4_in_html:
-            pixels.append(&quot;GA4&quot;)
+            pixels.append("GA4")
         if lead.gtm_in_html:
-            pixels.append(&quot;GTM&quot;)
+            pixels.append("GTM")
         if lead.google_ads_in_html:
-            pixels.append(&quot;GoogleAds&quot;)
-        pixels_str = &quot;,&quot;.join(pixels) if pixels else &quot;NONE&quot;
+            pixels.append("GoogleAds")
+        pixels_str = ",".join(pixels) if pixels else "NONE"
 
-        ps_str = (
-            f&quot;{lead.pagespeed_score}&quot;
-            if lead.pagespeed_score is not None
-            else &quot;N/A&quot;
-        )
-        lcp_str = (
-            f&quot;{lead.lcp_ms}ms&quot;
-            if lead.lcp_ms is not None
-            else &quot;N/A&quot;
-        )
-        rt_str = f&quot;{lead.response_ms}ms&quot; if lead.response_ms else &quot;N/A&quot;
+        ps_str = f"{lead.pagespeed_score}" if lead.pagespeed_score is not None else "N/A"
+        lcp_str = f"{lead.lcp_ms}ms" if lead.lcp_ms is not None else "N/A"
+        rt_str = f"{lead.response_ms}ms" if lead.response_ms else "N/A"
 
         lines.append(
-            f&quot;- domain={lead.domain} | location={lead.location or &apos;N/A&apos;} | &quot;
-            f&quot;platform={lead.platform or &apos;Unknown&apos;} | pixels_in_html=[{pixels_str}] | &quot;
-            f&quot;pagespeed_mobile={ps_str} | lcp={lcp_str} | response_time={rt_str} | &quot;
-            f&quot;gold_score={lead.score:.2f}&quot;
+            f"- domain={lead.domain} | location={lead.location or 'N/A'} | "
+            f"platform={lead.platform or 'Unknown'} | pixels_in_html=[{pixels_str}] | "
+            f"pagespeed_mobile={ps_str} | lcp={lcp_str} | response_time={rt_str} | "
+            f"gold_score={lead.score:.2f}"
         )
 
-    lines.append(
-        &quot;\nRemember: output ONLY the JSON object, no markdown, no explanation.&quot;
-    )
-    return &quot;\n&quot;.join(lines)
+    lines.append("\nRemember: output ONLY the JSON object, no markdown, no explanation.")
+    return "\n".join(lines)
 
 
 # ============================================================
 # Response parsing
 # ============================================================
 
-def _extract_text_from_response(data: dict[str, Any]) -&gt; str:
-    &quot;&quot;&quot;
+def _extract_text_from_response(data: dict[str, Any]) -> str:
+    """
     Extract text from kie.ai response. Support 2 format:
       1. OpenAI-compatible: data.choices[0].message.content
       2. Anthropic native:  data.content[0].text
-    &quot;&quot;&quot;
+    """
     # Format 1: OpenAI-compatible (most likely for kie.ai)
-    choices = data.get(&quot;choices&quot;)
+    choices = data.get("choices")
     if isinstance(choices, list) and choices:
-        msg = choices[0].get(&quot;message&quot;, {})
-        content = msg.get(&quot;content&quot;, &quot;&quot;)
+        msg = choices[0].get("message", {})
+        content = msg.get("content", "")
         if isinstance(content, str) and content:
             return content
         # Sometimes content is list of blocks
         if isinstance(content, list):
-            return &quot;&quot;.join(
-                b.get(&quot;text&quot;, &quot;&quot;) for b in content if isinstance(b, dict)
+            return "".join(
+                b.get("text", "") for b in content if isinstance(b, dict)
             )
 
-    # Format 2: An
+    # Format 2: Anthropic native
+    content = data.get("content")
+    if isinstance(content, list) and content:
+        return "".join(
+            b.get("text", "") for b in content if isinstance(b, dict)
+        )
+
+    return ""
+
+
+def _parse_json_response(text: str) -> dict[str, dict[str, str]]:
+    """
+    Parse JSON dari response. Strip markdown fences kalau ada (defensive).
+    Return dict {domain: {gold_reasons, outreach_angle}}.
+    """
+    if not text:
+        return {}
+
+    # Strip markdown code fences kalau Claude lupa rule
+    cleaned = text.strip()
+    cleaned = re.sub(r"^```(?:json)?\s*", "", cleaned)
+    cleaned = re.sub(r"\s*```$", "", cleaned)
+    cleaned = cleaned.strip()
+
+    try:
+        data = json.loads(cleaned)
+    except json.JSONDecodeError:
+        # Fallback: cari blok JSON pertama dengan regex
+        match = re.search(r"\{.*\}", cleaned, re.DOTALL)
+        if not match:
+            return {}
+        try:
+            data = json.loads(match.group(0))
+        except json.JSONDecodeError:
+            return {}
+
+    results = data.get("results", {})
+    if not isinstance(results, dict):
+        return {}
+
+    # Normalize: pastikan value selalu dict dengan 2 key
+    normalized: dict[str, dict[str, str]] = {}
+    for domain, payload in results.items():
+        if not isinstance(payload, dict):
+            continue
+        normalized[domain] = {
+            "gold_reasons": str(payload.get("gold_reasons", "")).strip(),
+            "outreach_angle": str(payload.get("outreach_angle", "")).strip(),
+        }
+    return normalized
+
+
+# ============================================================
+# Fallback (deterministic, no API needed)
+# ============================================================
+
+def _apply_fallback_to_all(leads: list[QualifiedLead]) -> list[QualifiedLead]:
+    """Apply template fallback to all leads. Used when API unavailable."""
+    for lead in leads:
+        lead.gold_reasons = _fallback_reasons(lead)
+        lead.outreach_angle = _fallback_outreach(lead)
+    return leads
+
+
+def _fallback_reasons(lead: QualifiedLead) -> str:
+    """Generate gold_reasons deterministic dari data enrichment."""
+    reasons = []
+
+    # Missing pixels
+    missing = []
+    if not lead.meta_pixel_in_html:
+        missing.append("Meta Pixel")
+    if not lead.ga4_in_html:
+        missing.append("GA4")
+    if not lead.gtm_in_html:
+        missing.append("GTM")
+    if not lead.google_ads_in_html:
+        missing.append("Google Ads tag")
+
+    if len(missing) >= 3:
+        reasons.append(f"Missing {len(missing)} key tracking pixels ({', '.join(missing[:3])}) - major retargeting & attribution gap.")
+    elif missing:
+        reasons.append(f"Missing {', '.join(missing)} - incomplete attribution stack.")
+
+    # PageSpeed
+    if lead.pagespeed_score is not None:
+        if lead.pagespeed_score < 50:
+            reasons.append(f"Mobile PageSpeed {lead.pagespe
