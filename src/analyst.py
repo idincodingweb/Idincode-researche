@@ -4,10 +4,9 @@ Claude AI Analyst Layer (via kie.ai)
 
 Tugas modul ini: ngubah data mentah enrichment jadi narasi yang JUAL.
 
-Design choices:
-  - Single batch call (semua lead dalam 1 request) untuk hemat token & cepat
-  - Graceful degradation: kalo API key kosong / kie.ai down, fallback ke
-    template reasoning deterministic (pipeline gak boleh mati gara-gara ini)
+Design:
+  - Single batch call ke kie.ai untuk hemat token & cepat
+  - Graceful degradation: kalo API key kosong / kie.ai down -> fallback template
   - Structured JSON output dari Claude untuk parsing reliable
 """
 from __future__ import annotations
@@ -37,16 +36,10 @@ async def enrich_with_ai_analyst(
 ) -> list[QualifiedLead]:
     """
     Enrich SEMUA leads dengan AI-generated gold_reasons + outreach_angle.
-
-    Strategy:
-      - Kalo IDINCODE_API gak ada -> pakai fallback template (deterministic)
-      - Kalo ada -> batch call ke kie.ai, parse JSON response
-      - Kalo Claude gagal/timeout -> fallback ke template per-lead
     """
     if not leads:
         return leads
 
-    # No API key -> fallback langsung
     if not IDINCODE_API:
         print("[analyst] IDINCODE_API kosong, pakai fallback template")
         return _apply_fallback_to_all(leads)
@@ -59,7 +52,6 @@ async def enrich_with_ai_analyst(
         print(f"[analyst] WARN: Claude call failed ({type(e).__name__}: {e}), pakai fallback")
         return _apply_fallback_to_all(leads)
 
-    # Merge AI output ke leads
     enriched: list[QualifiedLead] = []
     for lead in leads:
         ai_data = ai_results.get(lead.domain)
@@ -67,7 +59,6 @@ async def enrich_with_ai_analyst(
             lead.gold_reasons = ai_data.get("gold_reasons") or _fallback_reasons(lead)
             lead.outreach_angle = ai_data.get("outreach_angle") or _fallback_outreach(lead)
         else:
-            # Lead ini gak ke-cover di response Claude -> fallback
             lead.gold_reasons = _fallback_reasons(lead)
             lead.outreach_angle = _fallback_outreach(lead)
         enriched.append(lead)
@@ -77,7 +68,7 @@ async def enrich_with_ai_analyst(
 
 
 # ============================================================
-# kie.ai API call (OpenAI-compatible endpoint)
+# kie.ai API call
 # ============================================================
 
 async def _call_claude_batch(
@@ -85,9 +76,6 @@ async def _call_claude_batch(
     *,
     max_retries: int,
 ) -> dict[str, dict[str, str]]:
-    """
-    Kirim semua lead dalam 1 request, return dict {domain: {gold_reasons, outreach_angle}}.
-    """
     system_prompt = _build_system_prompt()
     user_prompt = _build_user_prompt(leads)
 
@@ -122,7 +110,6 @@ async def _call_claude_batch(
                     return parsed
                 raise ValueError("Empty or invalid JSON from Claude")
 
-            # Rate limit / server error -> retry
             if resp.status_code in (429, 500, 502, 503, 504):
                 last_error = RuntimeError(f"HTTP {resp.status_code}: {resp.text[:200]}")
                 if attempt < max_retries:
@@ -132,7 +119,6 @@ async def _call_claude_batch(
                     continue
                 raise last_error
 
-            # Client error (4xx) -> no retry
             raise RuntimeError(f"HTTP {resp.status_code}: {resp.text[:200]}")
 
         except httpx.TimeoutException as e:
@@ -164,13 +150,11 @@ def _build_system_prompt() -> str:
         "1. Output ONLY valid JSON. No markdown fences, no preamble.\n"
         "2. For each domain, generate:\n"
         "   - gold_reasons (1-2 sentences): WHY this is a hot lead. Mention "
-        "     specific dollar impact when possible (e.g. 'losing ~$8K/mo from "
-        "     missed retargeting').\n"
+        "     specific dollar impact when possible.\n"
         "   - outreach_angle (1 sentence): A cold email subject line OR opening "
         "     hook that an agency could use immediately.\n"
         "3. Tone: confident, data-driven, no fluff.\n"
-        "4. If a clinic already has good infra (all pixels + fast site), say "
-        "   'limited opportunity' honestly - don't fabricate problems.\n"
+        "4. If a clinic already has good infra, say 'limited opportunity' honestly.\n"
         "5. Response format MUST be exactly:\n"
         "{\n"
         '  "results": {\n'
@@ -182,7 +166,6 @@ def _build_system_prompt() -> str:
 
 
 def _build_user_prompt(leads: list[QualifiedLead]) -> str:
-    """Compact lead data jadi tabel ringkas yang Claude bisa cerna."""
     lines = [
         "Analyze these plastic surgery clinics. For each, generate gold_reasons "
         "& outreach_angle. Return JSON only.\n",
@@ -221,25 +204,17 @@ def _build_user_prompt(leads: list[QualifiedLead]) -> str:
 # ============================================================
 
 def _extract_text_from_response(data: dict[str, Any]) -> str:
-    """
-    Extract text from kie.ai response. Support 2 format:
-      1. OpenAI-compatible: data.choices[0].message.content
-      2. Anthropic native:  data.content[0].text
-    """
-    # Format 1: OpenAI-compatible (most likely for kie.ai)
     choices = data.get("choices")
     if isinstance(choices, list) and choices:
         msg = choices[0].get("message", {})
         content = msg.get("content", "")
         if isinstance(content, str) and content:
             return content
-        # Sometimes content is list of blocks
         if isinstance(content, list):
             return "".join(
                 b.get("text", "") for b in content if isinstance(b, dict)
             )
 
-    # Format 2: Anthropic native
     content = data.get("content")
     if isinstance(content, list) and content:
         return "".join(
@@ -250,14 +225,9 @@ def _extract_text_from_response(data: dict[str, Any]) -> str:
 
 
 def _parse_json_response(text: str) -> dict[str, dict[str, str]]:
-    """
-    Parse JSON dari response. Strip markdown fences kalau ada (defensive).
-    Return dict {domain: {gold_reasons, outreach_angle}}.
-    """
     if not text:
         return {}
 
-    # Strip markdown code fences kalau Claude lupa rule
     cleaned = text.strip()
     cleaned = re.sub(r"^```(?:json)?\s*", "", cleaned)
     cleaned = re.sub(r"\s*```$", "", cleaned)
@@ -266,7 +236,6 @@ def _parse_json_response(text: str) -> dict[str, dict[str, str]]:
     try:
         data = json.loads(cleaned)
     except json.JSONDecodeError:
-        # Fallback: cari blok JSON pertama dengan regex
         match = re.search(r"\{.*\}", cleaned, re.DOTALL)
         if not match:
             return {}
@@ -279,7 +248,6 @@ def _parse_json_response(text: str) -> dict[str, dict[str, str]]:
     if not isinstance(results, dict):
         return {}
 
-    # Normalize: pastikan value selalu dict dengan 2 key
     normalized: dict[str, dict[str, str]] = {}
     for domain, payload in results.items():
         if not isinstance(payload, dict):
@@ -296,7 +264,6 @@ def _parse_json_response(text: str) -> dict[str, dict[str, str]]:
 # ============================================================
 
 def _apply_fallback_to_all(leads: list[QualifiedLead]) -> list[QualifiedLead]:
-    """Apply template fallback to all leads. Used when API unavailable."""
     for lead in leads:
         lead.gold_reasons = _fallback_reasons(lead)
         lead.outreach_angle = _fallback_outreach(lead)
@@ -304,10 +271,8 @@ def _apply_fallback_to_all(leads: list[QualifiedLead]) -> list[QualifiedLead]:
 
 
 def _fallback_reasons(lead: QualifiedLead) -> str:
-    """Generate gold_reasons deterministic dari data enrichment."""
     reasons = []
 
-    # Missing pixels
     missing = []
     if not lead.meta_pixel_in_html:
         missing.append("Meta Pixel")
@@ -319,11 +284,69 @@ def _fallback_reasons(lead: QualifiedLead) -> str:
         missing.append("Google Ads tag")
 
     if len(missing) >= 3:
-        reasons.append(f"Missing {len(missing)} key tracking pixels ({', '.join(missing[:3])}) - major retargeting & attribution gap.")
+        reasons.append(
+            f"Missing {len(missing)} key tracking pixels "
+            f"({', '.join(missing[:3])}) - major retargeting & attribution gap."
+        )
     elif missing:
-        reasons.append(f"Missing {', '.join(missing)} - incomplete attribution stack.")
+        reasons.append(
+            f"Missing {', '.join(missing)} - incomplete attribution stack."
+        )
 
-    # PageSpeed
     if lead.pagespeed_score is not None:
         if lead.pagespeed_score < 50:
-            reasons.append(f"Mobile PageSpeed {lead.pagespe
+            reasons.append(
+                f"Mobile PageSpeed {lead.pagespeed_score}/100 - high bounce risk on mobile traffic."
+            )
+        elif lead.pagespeed_score < 70:
+            reasons.append(
+                f"Mobile PageSpeed {lead.pagespeed_score}/100 - room for conversion uplift."
+            )
+
+    if lead.response_ms and lead.response_ms > 3000:
+        reasons.append(
+            f"Server response {lead.response_ms}ms - signals hosting/tech debt."
+        )
+
+    if lead.platform and lead.platform.lower() in ("wordpress", "woocommerce"):
+        reasons.append("WordPress stack - easy to onboard for tracking & speed fixes.")
+
+    if not reasons:
+        return "Limited opportunity - infrastructure looks healthy. Consider for retention plays only."
+
+    return " ".join(reasons)
+
+
+def _fallback_outreach(lead: QualifiedLead) -> str:
+    domain_label = lead.domain.replace("www.", "").split(".")[0].title()
+
+    missing_pixels = []
+    if not lead.meta_pixel_in_html:
+        missing_pixels.append("Meta Pixel")
+    if not lead.ga4_in_html:
+        missing_pixels.append("GA4")
+    if not lead.google_ads_in_html:
+        missing_pixels.append("Google Ads tag")
+
+    if len(missing_pixels) >= 2:
+        return (
+            f"Subject: Found {len(missing_pixels)} tracking gaps on {domain_label}'s site "
+            f"- worth a 15-min chat?"
+        )
+
+    if lead.pagespeed_score is not None and lead.pagespeed_score < 50:
+        return (
+            f"Subject: {domain_label}'s mobile site loads at {lead.pagespeed_score}/100 "
+            f"- here's what it's costing you"
+        )
+
+    if lead.response_ms and lead.response_ms > 3000:
+        return (
+            f"Subject: Quick note about {domain_label}'s site speed "
+            f"(I think you're losing leads)"
+        )
+
+    return (
+        f"Subject: 3 quick wins I spotted for {domain_label} "
+        f"(takes 5 min to read)"
+          )
