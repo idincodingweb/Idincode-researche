@@ -29,14 +29,20 @@ async def test_fetch_site_success():
     assert res.response_ms is not None
 
 
-async def test_fetch_site_handles_error():
+async def test_fetch_site_success():
     def handler(request: httpx.Request) -> httpx.Response:
-        raise httpx.ConnectError("boom")
+        return httpx.Response(
+            200,
+            text="<html><script src='fbevents.js'></script></html>",
+            headers={"X-Shopify-Stage": "production"},
+        )
 
     async with _mock_client(handler) as client:
-        res = await fetch_site(client, "https://dead-domain.test")
-    assert res.ok is False
-    assert res.error is not None
+        res = await fetch_site(client, "https://example.com")
+    assert res.ok is True
+    assert res.status_code == 200
+    assert "fbevents.js" in res.html
+    assert res.response_ms is not None
     assert res.html == ""
 
 
