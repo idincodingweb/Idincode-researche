@@ -1,11 +1,11 @@
-# src/analyst.py
+# src/analyst.py (VERSI FIXED — Anthropic Native Format)
 """
-Claude AI Analyst Layer (via kie.ai)
+Claude AI Analyst Layer (via kie.ai — Anthropic native endpoint)
 
 Tugas modul ini: ngubah data mentah enrichment jadi narasi yang JUAL.
 
 Design:
-  - Single batch call ke kie.ai untuk hemat token & cepat
+  - Single batch call ke kie.ai endpoint /claude/v1/messages
   - Graceful degradation: kalo API key kosong / kie.ai down -> fallback template
   - Structured JSON output dari Claude untuk parsing reliable
 """
@@ -68,7 +68,7 @@ async def enrich_with_ai_analyst(
 
 
 # ============================================================
-# kie.ai API call
+# kie.ai API call (Anthropic native endpoint)
 # ============================================================
 
 async def _call_claude_batch(
@@ -76,25 +76,31 @@ async def _call_claude_batch(
     *,
     max_retries: int,
 ) -> dict[str, dict[str, str]]:
+    """
+    Call kie.ai endpoint /claude/v1/messages (Anthropic native format).
+    Return dict {domain: {gold_reasons, outreach_angle}}.
+    """
     system_prompt = _build_system_prompt()
     user_prompt = _build_user_prompt(leads)
 
     payload = {
-        "model": KIE_AI_MODEL,
+        "model": KIE_AI_MODEL,  # "claude-opus-4-7" atau yg lo atur di config
         "max_tokens": 4000,
-        "temperature": 0.4,
+        "stream": False,
         "messages": [
-            {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt},
         ],
+        "system": system_prompt,  # Anthropic native: system di top level, bukan di messages
     }
 
     headers = {
         "Authorization": f"Bearer {IDINCODE_API}",
         "Content-Type": "application/json",
+        "anthropic-version": "2023-06-01",  # Anthropic API version (required)
     }
 
-    url = f"{KIE_AI_BASE_URL.rstrip('/')}/chat/completions"
+    # Endpoint Anthropic native (dari baseai.txt lo)
+    url = f"{KIE_AI_BASE_URL.rstrip('/')}/claude/v1/messages"
 
     last_error: Exception | None = None
     for attempt in range(max_retries + 1):
@@ -200,31 +206,47 @@ def _build_user_prompt(leads: list[QualifiedLead]) -> str:
 
 
 # ============================================================
-# Response parsing
+# Response parsing (Anthropic native format)
 # ============================================================
 
 def _extract_text_from_response(data: dict[str, Any]) -> str:
+    """
+    Extract text dari Anthropic native response format.
+    
+    Expected format (dari kie.ai /claude/v1/messages):
+    {
+      "content": [
+        {"type": "text", "text": "..."},
+        ...
+      ],
+      "stop_reason": "end_turn"
+    }
+    """
+    content = data.get("content")
+    if isinstance(content, list) and content:
+        # Anthropic native: content adalah list of blocks
+        for block in content:
+            if isinstance(block, dict) and block.get("type") == "text":
+                text = block.get("text", "")
+                if text:
+                    return text
+
+    # Fallback: check jika format OpenAI-compatible ternyata dikirim
     choices = data.get("choices")
     if isinstance(choices, list) and choices:
         msg = choices[0].get("message", {})
-        content = msg.get("content", "")
-        if isinstance(content, str) and content:
-            return content
-        if isinstance(content, list):
-            return "".join(
-                b.get("text", "") for b in content if isinstance(b, dict)
-            )
-
-    content = data.get("content")
-    if isinstance(content, list) and content:
-        return "".join(
-            b.get("text", "") for b in content if isinstance(b, dict)
-        )
+        content_field = msg.get("content", "")
+        if isinstance(content_field, str) and content_field:
+            return content_field
 
     return ""
 
 
 def _parse_json_response(text: str) -> dict[str, dict[str, str]]:
+    """
+    Parse JSON dari response. Strip markdown kalau Ada (defensive).
+    Return dict {domain: {gold_reasons, outreach_angle}}.
+    """
     if not text:
         return {}
 
@@ -349,4 +371,4 @@ def _fallback_outreach(lead: QualifiedLead) -> str:
     return (
         f"Subject: 3 quick wins I spotted for {domain_label} "
         f"(takes 5 min to read)"
-          )
+    )
