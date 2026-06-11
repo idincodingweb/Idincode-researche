@@ -1,203 +1,167 @@
 # src/qualifier.py
-"""
-Qualifier / Scoring Engine
-
-Inverted scoring logic:
-  - Sedikit pixel  = score TINGGI  (peluang jual jasa tracking)
-  - PageSpeed buruk = score TINGGI  (peluang jual jasa speed optimization)
-  - Response lambat = score TINGGI  (sign tech debt)
-
-Buyer kita = marketing agency. Mereka cari klinik yang PUNYA MASALAH,
-bukan yang udah perfect.
-"""
+"""Inverted scoring: makin banyak gap = makin tinggi score = makin gede peluang jual."""
 from __future__ import annotations
+
+from typing import Optional
 
 from src.models import EnrichmentResult, QualifiedLead
 
 
 # ============================================================
-# Per-niche config
+# Niche Weights (sum = 1.0 per niche)
 # ============================================================
-
-NICHE_CONFIG: dict[str, dict] = {
+NICHE_CONFIG: dict[str, dict[str, float]] = {
     "medical_high_ticket": {
-        "min_response_ms": 6000,
-        "weights": {
-            "reachable": 0.15,
-            "platform": 0.20,
-            "pixels": 0.35,
-            "pagespeed": 0.30,
-        },
+        "pixels": 0.40,
+        "pagespeed": 0.35,
+        "lcp": 0.15,
+        "platform": 0.10,
     },
     "luxury_fitness": {
-        "min_response_ms": 5000,
-        "weights": {
-            "reachable": 0.15,
-            "platform": 0.25,
-            "pixels": 0.35,
-            "pagespeed": 0.25,
-        },
+        "pixels": 0.35,
+        "pagespeed": 0.30,
+        "lcp": 0.20,
+        "platform": 0.15,
     },
-}
-
-_DEFAULT_CONFIG = {
-    "min_response_ms": 8000,
-    "weights": {
-        "reachable": 0.20,
-        "platform": 0.25,
-        "pixels": 0.30,
+    "premium_gym": {
+        "pixels": 0.35,
+        "pagespeed": 0.30,
+        "lcp": 0.20,
+        "platform": 0.15,
+    },
+    "cosmetic_dentistry": {
+        "pixels": 0.45,  # Dentist biasanya kurang pixel-savvy
+        "pagespeed": 0.30,
+        "lcp": 0.15,
+        "platform": 0.10,
+    },
+    "high_ticket_contractor": {
+        "pixels": 0.45,  # Kontraktor renovasi sering minimal tracking
         "pagespeed": 0.25,
+        "lcp": 0.15,
+        "platform": 0.15,
+    },
+    "default": {
+        "pixels": 0.40,
+        "pagespeed": 0.30,
+        "lcp": 0.20,
+        "platform": 0.10,
     },
 }
 
 
-def _get_config(niche: str) -> dict:
-    return NICHE_CONFIG.get(niche, _DEFAULT_CONFIG)
-
-
 # ============================================================
-# Sub-scorers (semua return float 0.0 - 1.0)
+# Response time penalty threshold (ms)
 # ============================================================
-
-def _score_reachable(r: EnrichmentResult) -> float:
-    """Site harus reachable. Kalau ga reachable, gak bisa jual jasa."""
-    if not r.reachable:
-        return 0.0
-    if r.status_code and 200 <= r.status_code < 400:
-        return 1.0
-    return 0.3  # reachable tapi non-2xx
+_RESPONSE_PENALTY_THRESHOLD_MS = 2000
+_RESPONSE_PENALTY_FACTOR = 0.15  # 15% penalty
 
 
-def _score_platform(r: EnrichmentResult) -> float:
-    """
-    Platform yang 'fixable' = score tinggi.
-    WordPress/WooCommerce/Shopify gampang di-improve = peluang besar.
-    Custom/unknown = lebih sulit di-onboard.
-    """
-    if not r.platform:
-        return 0.4  # unknown platform = medium
-    platform = r.platform.lower()
-    if platform in ("wordpress", "woocommerce"):
-        return 1.0  # gold — most fixable
-    if platform in ("shopify",):
-        return 0.85
-    if platform in ("wix", "squarespace", "webflow"):
-        return 0.5  # SaaS = limited customization
-    if platform in ("magento",):
-        return 0.7
-    return 0.4
+def qualify_lead(enrichment: EnrichmentResult) -> QualifiedLead:
+    """Konversi EnrichmentResult → QualifiedLead dengan score."""
+    weights = NICHE_CONFIG.get(enrichment.niche, NICHE_CONFIG["default"])
 
+    pixel_score = _score_pixels(enrichment)
+    pagespeed_score = _score_pagespeed(enrichment.pagespeed_score)
+    lcp_score = _score_lcp(enrichment.lcp_ms)
+    platform_score = _score_platform(enrichment.platform)
 
-def _score_pixels(r: EnrichmentResult) -> float:
-    """
-    INVERTED LOGIC: SEDIKIT pixel = GOLD.
-    0 pixel       = 1.00 (jackpot — semua jasa tracking bisa dijual)
-    1 pixel       = 0.75
-    2 pixel       = 0.50
-    3 pixel       = 0.25
-    4+ pixel      = 0.10 (sudah established, less opportunity)
-    """
-    pixel_count = sum([
-        r.has_meta_pixel,
-        r.has_tiktok_pixel,
-        r.has_ga4,
-        r.has_gtm,
-        r.has_google_ads,
-    ])
-
-    if pixel_count == 0:
-        return 1.00
-    if pixel_count == 1:
-        return 0.75
-    if pixel_count == 2:
-        return 0.50
-    if pixel_count == 3:
-        return 0.25
-    return 0.10
-
-
-def _score_pagespeed(r: EnrichmentResult) -> float:
-    """
-    INVERTED LOGIC: PageSpeed JELEK = GOLD (peluang jual jasa speed opt).
-    Kalau PageSpeed API ga jalan (no key), return neutral 0.5.
-
-    Score mapping (mobile performance):
-      0-29   = 1.00 (sangat lambat — urgent)
-      30-49  = 0.85
-      50-69  = 0.60
-      70-84  = 0.30
-      85-100 = 0.10 (udah cepet — less opportunity)
-    """
-    if not r.pagespeed_available or r.pagespeed_score is None:
-        return 0.5  # neutral, gak bisa dinilai
-
-    s = r.pagespeed_score
-    if s < 30:
-        return 1.00
-    if s < 50:
-        return 0.85
-    if s < 70:
-        return 0.60
-    if s < 85:
-        return 0.30
-    return 0.10
-
-
-# ============================================================
-# Main scoring
-# ============================================================
-
-def score_lead(r: EnrichmentResult) -> QualifiedLead:
-    """Hitung composite score 0.0-1.0 dari weighted sub-scores."""
-    config = _get_config(r.niche)
-    weights = config["weights"]
-
-    sub_scores = {
-        "reachable": _score_reachable(r),
-        "platform": _score_platform(r),
-        "pixels": _score_pixels(r),
-        "pagespeed": _score_pagespeed(r),
-    }
-
-    composite = sum(
-        sub_scores[key] * weights.get(key, 0.0)
-        for key in sub_scores
+    composite = (
+        pixel_score * weights["pixels"]
+        + pagespeed_score * weights["pagespeed"]
+        + lcp_score * weights["lcp"]
+        + platform_score * weights["platform"]
     )
 
-    # Penalty untuk response time lambat
-    if r.response_ms and r.response_ms > config["min_response_ms"]:
-        composite *= 0.85  # 15% penalty kalo terlalu lambat (mungkin server issue)
+    # Response time penalty
+    if (
+        enrichment.response_ms is not None
+        and enrichment.response_ms > _RESPONSE_PENALTY_THRESHOLD_MS
+    ):
+        composite *= 1 - _RESPONSE_PENALTY_FACTOR
 
-    composite = round(min(max(composite, 0.0), 1.0), 4)
+    composite = max(0.0, min(1.0, composite))
 
     return QualifiedLead(
-        domain=r.domain,
-        niche=r.niche,
-        category_name=r.category_name,
-        location=r.location,
-        score=composite,
-        response_ms=r.response_ms,
-        platform=r.platform,
-        meta_pixel_in_html=r.has_meta_pixel,
-        ga4_in_html=r.has_ga4,
-        gtm_in_html=r.has_gtm,
-        google_ads_in_html=r.has_google_ads,
-        pagespeed_score=r.pagespeed_score,
-        lcp_ms=r.lcp_ms,
-        gold_reasons="",       # Diisi nanti oleh analyst.py
-        outreach_angle="",     # Diisi nanti oleh analyst.py
+        domain=enrichment.domain,
+        location=enrichment.location,
+        niche=enrichment.niche,
+        category=enrichment.category,
+        score=round(composite, 4),
+        platform=enrichment.platform,
+        meta_pixel_in_html=enrichment.has_meta_pixel,
+        tiktok_pixel_in_html=enrichment.has_tiktok_pixel,
+        ga4_in_html=enrichment.has_ga4,
+        gtm_in_html=enrichment.has_gtm,
+        google_ads_in_html=enrichment.has_google_ads,
+        pagespeed_score=enrichment.pagespeed_score,
+        lcp_ms=enrichment.lcp_ms,
+        response_ms=enrichment.response_ms,
     )
 
 
-def qualify_leads(
-    enrichments: list[EnrichmentResult],
-    *,
-    min_score: float = 0.0,
-) -> list[QualifiedLead]:
-    """
-    Convert enrichments -> qualified leads, filter by min_score, sort desc.
-    """
-    leads = [score_lead(r) for r in enrichments]
-    leads = [l for l in leads if l.score >= min_score]
-    leads.sort(key=lambda x: x.score, reverse=True)
-    return leads
+# ============================================================
+# Inverted scoring functions (higher = more opportunity)
+# ============================================================
+def _score_pixels(e: EnrichmentResult) -> float:
+    """0 pixel = 1.0, 4 pixel = 0.10."""
+    core_pixels = [
+        e.has_meta_pixel,
+        e.has_ga4,
+        e.has_gtm,
+        e.has_google_ads,
+    ]
+    present = sum(core_pixels)
+
+    # Inverted mapping
+    if present == 0:
+        return 1.00
+    if present == 1:
+        return 0.85
+    if present == 2:
+        return 0.60
+    if present == 3:
+        return 0.30
+    return 0.10  # 4/4 pixel = mature, low opportunity
+
+
+def _score_pagespeed(score: Optional[int]) -> float:
+    """Inverted: 0-29 = 1.0, 85-100 = 0.10."""
+    if score is None:
+        return 0.50  # Neutral kalau data gak ada
+    if score < 30:
+        return 1.00
+    if score < 50:
+        return 0.85
+    if score < 70:
+        return 0.60
+    if score < 85:
+        return 0.35
+    return 0.10
+
+
+def _score_lcp(lcp_ms: Optional[int]) -> float:
+    """Inverted: > 6000ms = 1.0, < 2500ms = 0.10."""
+    if lcp_ms is None:
+        return 0.50
+    if lcp_ms > 6000:
+        return 1.00
+    if lcp_ms > 4000:
+        return 0.80
+    if lcp_ms > 2500:
+        return 0.50
+    return 0.10
+
+
+def _score_platform(platform: Optional[str]) -> float:
+    """WordPress/WooCommerce paling mudah onboard = score tinggi."""
+    if not platform:
+        return 0.50
+    p = platform.lower()
+    if p in ("wordpress", "woocommerce"):
+        return 1.00
+    if p in ("shopify", "bigcommerce"):
+        return 0.80
+    if p in ("wix", "squarespace", "webflow"):
+        return 0.60
+    return 0.40
