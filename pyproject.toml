@@ -1,8 +1,8 @@
 [project]
 name = "apex-intel"
 version = "0.1.0"
-description = "Self-curated lead qualification pipeline"
-authors = [{name = "Idin", email = "idincode@gmail.com"}]
+description = "Apex Market Intelligence - Lead qualification pipeline"
+authors = [{name = "Idin Iskandar", email = "idin@example.com"}]
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
@@ -12,10 +12,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = [
-    "pytest>=8.0",
-    "pytest-asyncio>=0.23",
-]
+dev = ["pytest>=8.0", "pytest-asyncio>=0.23"]
 
 [build-system]
 requires = ["hatchling"]
