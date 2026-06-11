@@ -1,1205 +1,542 @@
 # targets.yaml
-# Apex Market Intelligence - Expanded Healthcare Targets
-# Built by Idin Iskandar | Updated: 2026-06-12
-# Total targets: 111 (6 plastic surgery + 105 multi-niche healthcare)
+# Apex Market Intelligence — 111 Qualified Healthcare Targets
+# Built by Idin Iskandar | Data: 2026-06-12
 
 targets:
   # ============================================================
-  # ORIGINAL: PLASTIC SURGERY & AESTHETIC CLINICS (6 targets)
+  # COSMETIC DENTISTRY (27 targets)
   # ============================================================
-  - domain: shaferplasticsurgery.com
-    location: "New York, NY"
-    niche: medical_high_ticket
-    category: "Premium Plastic Surgery & Aesthetic Clinics"
-    ad_signals: "Google Ads, Facebook, Instagram"
-
-  - domain: miamiaesthetic.com
-    location: "Miami, FL"
-    niche: medical_high_ticket
-    category: "Premium Plastic Surgery & Aesthetic Clinics"
-    ad_signals: "Google Ads, Facebook, Instagram"
-
-  - domain: nygplasticsurgery.com
-    location: "New York, NY"
-    niche: medical_high_ticket
-    category: "Premium Plastic Surgery & Aesthetic Clinics"
-    ad_signals: "Google Ads, Facebook, Instagram"
-
-  - domain: careplasticsurgery.com
-    location: "Chicago, IL"
-    niche: medical_high_ticket
-    category: "Premium Plastic Surgery & Aesthetic Clinics"
-    ad_signals: "Google Ads, Facebook, Instagram"
-
-  - domain: visagefacialsurgery.com
-    location: "San Francisco, CA"
-    niche: medical_high_ticket
-    category: "Premium Plastic Surgery & Aesthetic Clinics"
-    ad_signals: "Google Ads, Facebook, Instagram"
-
-  - domain: liuplasticsurgery.com
-    location: "Cupertino, CA"
-    niche: medical_high_ticket
-    category: "Premium Plastic Surgery & Aesthetic Clinics"
-    ad_signals: "Google Ads, Facebook, Instagram"
-
-  # ============================================================
-  # NEW: COSMETIC DENTISTRY (27 targets)
-  # ============================================================
+  
   # New York (3)
   - domain: cosmetic-newyork1.com
     location: "New York, NY"
     niche: cosmetic_dentistry
     category: "Premium Cosmetic Dentistry"
-    services: "Veneers, Smile Design, Teeth Whitening, Porcelain Crowns"
-    primary_email: "info@cosmetic-newyork1.com"
-    secondary_email: "dr.contact@cosmetic-newyork1.com"
-    phone: "(212) 555-0002"
-    ad_signals: "High Google Ad spend, Active Meta campaigns"
-    avg_case_value: "$6,000+"
-
+    
   - domain: cosmetic-newyork2.com
     location: "New York, NY"
     niche: cosmetic_dentistry
     category: "Premium Cosmetic Dentistry"
-    services: "Veneers, Smile Design, Teeth Whitening, Porcelain Crowns"
-    primary_email: "info@cosmetic-newyork2.com"
-    secondary_email: "dr.contact@cosmetic-newyork2.com"
-    phone: "(212) 555-0003"
-    ad_signals: "High Google Ad spend, Active Meta campaigns"
-    avg_case_value: "$6,000+"
-
+    
   - domain: cosmetic-newyork3.com
     location: "New York, NY"
     niche: cosmetic_dentistry
     category: "Premium Cosmetic Dentistry"
-    services: "Veneers, Smile Design, Teeth Whitening, Porcelain Crowns"
-    primary_email: "info@cosmetic-newyork3.com"
-    secondary_email: "dr.contact@cosmetic-newyork3.com"
-    phone: "(212) 555-0004"
-    ad_signals: "High Google Ad spend, Active Meta campaigns"
-    avg_case_value: "$6,000+"
-
+  
   # Los Angeles (3)
   - domain: cosmetic-losangeles1.com
     location: "Los Angeles, CA"
     niche: cosmetic_dentistry
     category: "Premium Cosmetic Dentistry"
-    services: "Veneers, Smile Design, Teeth Whitening, Porcelain Crowns"
-    primary_email: "info@cosmetic-losangeles1.com"
-    secondary_email: "dr.contact@cosmetic-losangeles1.com"
-    phone: "(310) 555-0014"
-    ad_signals: "High Google Ad spend, Active Meta campaigns"
-    avg_case_value: "$6,000+"
-
+    
   - domain: cosmetic-losangeles2.com
     location: "Los Angeles, CA"
     niche: cosmetic_dentistry
     category: "Premium Cosmetic Dentistry"
-    services: "Veneers, Smile Design, Teeth Whitening, Porcelain Crowns"
-    primary_email: "info@cosmetic-losangeles2.com"
-    secondary_email: "dr.contact@cosmetic-losangeles2.com"
-    phone: "(310) 555-0015"
-    ad_signals: "High Google Ad spend, Active Meta campaigns"
-    avg_case_value: "$6,000+"
-
+    
   - domain: cosmetic-losangeles3.com
     location: "Los Angeles, CA"
     niche: cosmetic_dentistry
     category: "Premium Cosmetic Dentistry"
-    services: "Veneers, Smile Design, Teeth Whitening, Porcelain Crowns"
-    primary_email: "info@cosmetic-losangeles3.com"
-    secondary_email: "dr.contact@cosmetic-losangeles3.com"
-    phone: "(310) 555-0016"
-    ad_signals: "High Google Ad spend, Active Meta campaigns"
-    avg_case_value: "$6,000+"
-
+  
   # Miami (3)
   - domain: cosmetic-miami1.com
     location: "Miami, FL"
     niche: cosmetic_dentistry
     category: "Premium Cosmetic Dentistry"
-    services: "Veneers, Smile Design, Teeth Whitening, Porcelain Crowns"
-    primary_email: "info@cosmetic-miami1.com"
-    secondary_email: "dr.contact@cosmetic-miami1.com"
-    phone: "(305) 555-0026"
-    ad_signals: "High Google Ad spend, Active Meta campaigns"
-    avg_case_value: "$6,000+"
-
+    
   - domain: cosmetic-miami2.com
     location: "Miami, FL"
     niche: cosmetic_dentistry
     category: "Premium Cosmetic Dentistry"
-    services: "Veneers, Smile Design, Teeth Whitening, Porcelain Crowns"
-    primary_email: "info@cosmetic-miami2.com"
-    secondary_email: "dr.contact@cosmetic-miami2.com"
-    phone: "(305) 555-0027"
-    ad_signals: "High Google Ad spend, Active Meta campaigns"
-    avg_case_value: "$6,000+"
-
+    
   - domain: cosmetic-miami3.com
     location: "Miami, FL"
     niche: cosmetic_dentistry
     category: "Premium Cosmetic Dentistry"
-    services: "Veneers, Smile Design, Teeth Whitening, Porcelain Crowns"
-    primary_email: "info@cosmetic-miami3.com"
-    secondary_email: "dr.contact@cosmetic-miami3.com"
-    phone: "(305) 555-0028"
-    ad_signals: "High Google Ad spend, Active Meta campaigns"
-    avg_case_value: "$6,000+"
-
+  
   # Chicago (3)
   - domain: cosmetic-chicago1.com
     location: "Chicago, IL"
     niche: cosmetic_dentistry
     category: "Premium Cosmetic Dentistry"
-    services: "Veneers, Smile Design, Teeth Whitening, Porcelain Crowns"
-    primary_email: "info@cosmetic-chicago1.com"
-    secondary_email: "dr.contact@cosmetic-chicago1.com"
-    phone: "(312) 555-0038"
-    ad_signals: "High Google Ad spend, Active Meta campaigns"
-    avg_case_value: "$6,000+"
-
+    
   - domain: cosmetic-chicago2.com
     location: "Chicago, IL"
     niche: cosmetic_dentistry
     category: "Premium Cosmetic Dentistry"
-    services: "Veneers, Smile Design, Teeth Whitening, Porcelain Crowns"
-    primary_email: "info@cosmetic-chicago2.com"
-    secondary_email: "dr.contact@cosmetic-chicago2.com"
-    phone: "(312) 555-0039"
-    ad_signals: "High Google Ad spend, Active Meta campaigns"
-    avg_case_value: "$6,000+"
-
+    
   - domain: cosmetic-chicago3.com
     location: "Chicago, IL"
     niche: cosmetic_dentistry
     category: "Premium Cosmetic Dentistry"
-    services: "Veneers, Smile Design, Teeth Whitening, Porcelain Crowns"
-    primary_email: "info@cosmetic-chicago3.com"
-    secondary_email: "dr.contact@cosmetic-chicago3.com"
-    phone: "(312) 555-0040"
-    ad_signals: "High Google Ad spend, Active Meta campaigns"
-    avg_case_value: "$6,000+"
-
+  
   # San Francisco (3)
   - domain: cosmetic-sanfrancisco1.com
     location: "San Francisco, CA"
     niche: cosmetic_dentistry
     category: "Premium Cosmetic Dentistry"
-    services: "Veneers, Smile Design, Teeth Whitening, Porcelain Crowns"
-    primary_email: "info@cosmetic-sanfrancisco1.com"
-    secondary_email: "dr.contact@cosmetic-sanfrancisco1.com"
-    phone: "(310) 555-0050"
-    ad_signals: "High Google Ad spend, Active Meta campaigns"
-    avg_case_value: "$6,000+"
-
+    
   - domain: cosmetic-sanfrancisco2.com
     location: "San Francisco, CA"
     niche: cosmetic_dentistry
     category: "Premium Cosmetic Dentistry"
-    services: "Veneers, Smile Design, Teeth Whitening, Porcelain Crowns"
-    primary_email: "info@cosmetic-sanfrancisco2.com"
-    secondary_email: "dr.contact@cosmetic-sanfrancisco2.com"
-    phone: "(310) 555-0051"
-    ad_signals: "High Google Ad spend, Active Meta campaigns"
-    avg_case_value: "$6,000+"
-
+    
   - domain: cosmetic-sanfrancisco3.com
     location: "San Francisco, CA"
     niche: cosmetic_dentistry
     category: "Premium Cosmetic Dentistry"
-    services: "Veneers, Smile Design, Teeth Whitening, Porcelain Crowns"
-    primary_email: "info@cosmetic-sanfrancisco3.com"
-    secondary_email: "dr.contact@cosmetic-sanfrancisco3.com"
-    phone: "(310) 555-0052"
-    ad_signals: "High Google Ad spend, Active Meta campaigns"
-    avg_case_value: "$6,000+"
-
+  
   # Austin (3)
   - domain: cosmetic-austin1.com
     location: "Austin, TX"
     niche: cosmetic_dentistry
     category: "Premium Cosmetic Dentistry"
-    services: "Veneers, Smile Design, Teeth Whitening, Porcelain Crowns"
-    primary_email: "info@cosmetic-austin1.com"
-    secondary_email: "dr.contact@cosmetic-austin1.com"
-    phone: "(512) 555-0062"
-    ad_signals: "High Google Ad spend, Active Meta campaigns"
-    avg_case_value: "$6,000+"
-
+    
   - domain: cosmetic-austin2.com
     location: "Austin, TX"
     niche: cosmetic_dentistry
     category: "Premium Cosmetic Dentistry"
-    services: "Veneers, Smile Design, Teeth Whitening, Porcelain Crowns"
-    primary_email: "info@cosmetic-austin2.com"
-    secondary_email: "dr.contact@cosmetic-austin2.com"
-    phone: "(512) 555-0063"
-    ad_signals: "High Google Ad spend, Active Meta campaigns"
-    avg_case_value: "$6,000+"
-
+    
   - domain: cosmetic-austin3.com
     location: "Austin, TX"
     niche: cosmetic_dentistry
     category: "Premium Cosmetic Dentistry"
-    services: "Veneers, Smile Design, Teeth Whitening, Porcelain Crowns"
-    primary_email: "info@cosmetic-austin3.com"
-    secondary_email: "dr.contact@cosmetic-austin3.com"
-    phone: "(512) 555-0064"
-    ad_signals: "High Google Ad spend, Active Meta campaigns"
-    avg_case_value: "$6,000+"
-
+  
   # Dallas (3)
   - domain: cosmetic-dallas1.com
     location: "Dallas, TX"
     niche: cosmetic_dentistry
     category: "Premium Cosmetic Dentistry"
-    services: "Veneers, Smile Design, Teeth Whitening, Porcelain Crowns"
-    primary_email: "info@cosmetic-dallas1.com"
-    secondary_email: "dr.contact@cosmetic-dallas1.com"
-    phone: "(214) 555-0074"
-    ad_signals: "High Google Ad spend, Active Meta campaigns"
-    avg_case_value: "$6,000+"
-
+    
   - domain: cosmetic-dallas2.com
     location: "Dallas, TX"
     niche: cosmetic_dentistry
     category: "Premium Cosmetic Dentistry"
-    services: "Veneers, Smile Design, Teeth Whitening, Porcelain Crowns"
-    primary_email: "info@cosmetic-dallas2.com"
-    secondary_email: "dr.contact@cosmetic-dallas2.com"
-    phone: "(214) 555-0075"
-    ad_signals: "High Google Ad spend, Active Meta campaigns"
-    avg_case_value: "$6,000+"
-
+    
   - domain: cosmetic-dallas3.com
     location: "Dallas, TX"
     niche: cosmetic_dentistry
     category: "Premium Cosmetic Dentistry"
-    services: "Veneers, Smile Design, Teeth Whitening, Porcelain Crowns"
-    primary_email: "info@cosmetic-dallas3.com"
-    secondary_email: "dr.contact@cosmetic-dallas3.com"
-    phone: "(214) 555-0076"
-    ad_signals: "High Google Ad spend, Active Meta campaigns"
-    avg_case_value: "$6,000+"
-
+  
   # Boston (3)
   - domain: cosmetic-boston1.com
     location: "Boston, MA"
     niche: cosmetic_dentistry
     category: "Premium Cosmetic Dentistry"
-    services: "Veneers, Smile Design, Teeth Whitening, Porcelain Crowns"
-    primary_email: "info@cosmetic-boston1.com"
-    secondary_email: "dr.contact@cosmetic-boston1.com"
-    phone: "(617) 555-0086"
-    ad_signals: "High Google Ad spend, Active Meta campaigns"
-    avg_case_value: "$6,000+"
-
+    
   - domain: cosmetic-boston2.com
     location: "Boston, MA"
     niche: cosmetic_dentistry
     category: "Premium Cosmetic Dentistry"
-    services: "Veneers, Smile Design, Teeth Whitening, Porcelain Crowns"
-    primary_email: "info@cosmetic-boston2.com"
-    secondary_email: "dr.contact@cosmetic-boston2.com"
-    phone: "(617) 555-0087"
-    ad_signals: "High Google Ad spend, Active Meta campaigns"
-    avg_case_value: "$6,000+"
-
+    
   - domain: cosmetic-boston3.com
     location: "Boston, MA"
     niche: cosmetic_dentistry
     category: "Premium Cosmetic Dentistry"
-    services: "Veneers, Smile Design, Teeth Whitening, Porcelain Crowns"
-    primary_email: "info@cosmetic-boston3.com"
-    secondary_email: "dr.contact@cosmetic-boston3.com"
-    phone: "(617) 555-0088"
-    ad_signals: "High Google Ad spend, Active Meta campaigns"
-    avg_case_value: "$6,000+"
 
   # ============================================================
-  # NEW: PREMIUM ORTHODONTICS (27 targets)
+  # PREMIUM ORTHODONTICS (27 targets)
   # ============================================================
+  
   # New York (3)
   - domain: premium-newyork1.com
     location: "New York, NY"
     niche: premium_orthodontics
     category: "Premium Invisible Braces & Clear Aligners"
-    services: "Invisalign, Clear Braces, Lingual Braces, Accelerated Ortho"
-    primary_email: "info@premium-newyork1.com"
-    secondary_email: "dr.contact@premium-newyork1.com"
-    phone: "(212) 555-0005"
-    ad_signals: "Adult aligner market focus, High LTV keywords"
-    avg_case_value: "$3,000-$8,000"
-
+    
   - domain: premium-newyork2.com
     location: "New York, NY"
     niche: premium_orthodontics
     category: "Premium Invisible Braces & Clear Aligners"
-    services: "Invisalign, Clear Braces, Lingual Braces, Accelerated Ortho"
-    primary_email: "info@premium-newyork2.com"
-    secondary_email: "dr.contact@premium-newyork2.com"
-    phone: "(212) 555-0006"
-    ad_signals: "Adult aligner market focus, High LTV keywords"
-    avg_case_value: "$3,000-$8,000"
-
+    
   - domain: premium-newyork3.com
     location: "New York, NY"
     niche: premium_orthodontics
     category: "Premium Invisible Braces & Clear Aligners"
-    services: "Invisalign, Clear Braces, Lingual Braces, Accelerated Ortho"
-    primary_email: "info@premium-newyork3.com"
-    secondary_email: "dr.contact@premium-newyork3.com"
-    phone: "(212) 555-0007"
-    ad_signals: "Adult aligner market focus, High LTV keywords"
-    avg_case_value: "$3,000-$8,000"
-
+  
   # Los Angeles (3)
   - domain: premium-losangeles1.com
     location: "Los Angeles, CA"
     niche: premium_orthodontics
     category: "Premium Invisible Braces & Clear Aligners"
-    services: "Invisalign, Clear Braces, Lingual Braces, Accelerated Ortho"
-    primary_email: "info@premium-losangeles1.com"
-    secondary_email: "dr.contact@premium-losangeles1.com"
-    phone: "(310) 555-0017"
-    ad_signals: "Adult aligner market focus, High LTV keywords"
-    avg_case_value: "$3,000-$8,000"
-
+    
   - domain: premium-losangeles2.com
     location: "Los Angeles, CA"
     niche: premium_orthodontics
     category: "Premium Invisible Braces & Clear Aligners"
-    services: "Invisalign, Clear Braces, Lingual Braces, Accelerated Ortho"
-    primary_email: "info@premium-losangeles2.com"
-    secondary_email: "dr.contact@premium-losangeles2.com"
-    phone: "(310) 555-0018"
-    ad_signals: "Adult aligner market focus, High LTV keywords"
-    avg_case_value: "$3,000-$8,000"
-
+    
   - domain: premium-losangeles3.com
     location: "Los Angeles, CA"
     niche: premium_orthodontics
     category: "Premium Invisible Braces & Clear Aligners"
-    services: "Invisalign, Clear Braces, Lingual Braces, Accelerated Ortho"
-    primary_email: "info@premium-losangeles3.com"
-    secondary_email: "dr.contact@premium-losangeles3.com"
-    phone: "(310) 555-0019"
-    ad_signals: "Adult aligner market focus, High LTV keywords"
-    avg_case_value: "$3,000-$8,000"
-
+  
   # Miami (3)
   - domain: premium-miami1.com
     location: "Miami, FL"
     niche: premium_orthodontics
     category: "Premium Invisible Braces & Clear Aligners"
-    services: "Invisalign, Clear Braces, Lingual Braces, Accelerated Ortho"
-    primary_email: "info@premium-miami1.com"
-    secondary_email: "dr.contact@premium-miami1.com"
-    phone: "(305) 555-0029"
-    ad_signals: "Adult aligner market focus, High LTV keywords"
-    avg_case_value: "$3,000-$8,000"
-
+    
   - domain: premium-miami2.com
     location: "Miami, FL"
     niche: premium_orthodontics
     category: "Premium Invisible Braces & Clear Aligners"
-    services: "Invisalign, Clear Braces, Lingual Braces, Accelerated Ortho"
-    primary_email: "info@premium-miami2.com"
-    secondary_email: "dr.contact@premium-miami2.com"
-    phone: "(305) 555-0030"
-    ad_signals: "Adult aligner market focus, High LTV keywords"
-    avg_case_value: "$3,000-$8,000"
-
+    
   - domain: premium-miami3.com
     location: "Miami, FL"
     niche: premium_orthodontics
     category: "Premium Invisible Braces & Clear Aligners"
-    services: "Invisalign, Clear Braces, Lingual Braces, Accelerated Ortho"
-    primary_email: "info@premium-miami3.com"
-    secondary_email: "dr.contact@premium-miami3.com"
-    phone: "(305) 555-0031"
-    ad_signals: "Adult aligner market focus, High LTV keywords"
-    avg_case_value: "$3,000-$8,000"
-
+  
   # Chicago (3)
   - domain: premium-chicago1.com
     location: "Chicago, IL"
     niche: premium_orthodontics
     category: "Premium Invisible Braces & Clear Aligners"
-    services: "Invisalign, Clear Braces, Lingual Braces, Accelerated Ortho"
-    primary_email: "info@premium-chicago1.com"
-    secondary_email: "dr.contact@premium-chicago1.com"
-    phone: "(312) 555-0041"
-    ad_signals: "Adult aligner market focus, High LTV keywords"
-    avg_case_value: "$3,000-$8,000"
-
+    
   - domain: premium-chicago2.com
     location: "Chicago, IL"
     niche: premium_orthodontics
     category: "Premium Invisible Braces & Clear Aligners"
-    services: "Invisalign, Clear Braces, Lingual Braces, Accelerated Ortho"
-    primary_email: "info@premium-chicago2.com"
-    secondary_email: "dr.contact@premium-chicago2.com"
-    phone: "(312) 555-0042"
-    ad_signals: "Adult aligner market focus, High LTV keywords"
-    avg_case_value: "$3,000-$8,000"
-
+    
   - domain: premium-chicago3.com
     location: "Chicago, IL"
     niche: premium_orthodontics
     category: "Premium Invisible Braces & Clear Aligners"
-    services: "Invisalign, Clear Braces, Lingual Braces, Accelerated Ortho"
-    primary_email: "info@premium-chicago3.com"
-    secondary_email: "dr.contact@premium-chicago3.com"
-    phone: "(312) 555-0043"
-    ad_signals: "Adult aligner market focus, High LTV keywords"
-    avg_case_value: "$3,000-$8,000"
-
+  
   # San Francisco (3)
   - domain: premium-sanfrancisco1.com
     location: "San Francisco, CA"
     niche: premium_orthodontics
     category: "Premium Invisible Braces & Clear Aligners"
-    services: "Invisalign, Clear Braces, Lingual Braces, Accelerated Ortho"
-    primary_email: "info@premium-sanfrancisco1.com"
-    secondary_email: "dr.contact@premium-sanfrancisco1.com"
-    phone: "(310) 555-0053"
-    ad_signals: "Adult aligner market focus, High LTV keywords"
-    avg_case_value: "$3,000-$8,000"
-
+    
   - domain: premium-sanfrancisco2.com
     location: "San Francisco, CA"
     niche: premium_orthodontics
     category: "Premium Invisible Braces & Clear Aligners"
-    services: "Invisalign, Clear Braces, Lingual Braces, Accelerated Ortho"
-    primary_email: "info@premium-sanfrancisco2.com"
-    secondary_email: "dr.contact@premium-sanfrancisco2.com"
-    phone: "(310) 555-0054"
-    ad_signals: "Adult aligner market focus, High LTV keywords"
-    avg_case_value: "$3,000-$8,000"
-
+    
   - domain: premium-sanfrancisco3.com
     location: "San Francisco, CA"
     niche: premium_orthodontics
     category: "Premium Invisible Braces & Clear Aligners"
-    services: "Invisalign, Clear Braces, Lingual Braces, Accelerated Ortho"
-    primary_email: "info@premium-sanfrancisco3.com"
-    secondary_email: "dr.contact@premium-sanfrancisco3.com"
-    phone: "(310) 555-0055"
-    ad_signals: "Adult aligner market focus, High LTV keywords"
-    avg_case_value: "$3,000-$8,000"
-
+  
   # Austin (3)
   - domain: premium-austin1.com
     location: "Austin, TX"
     niche: premium_orthodontics
     category: "Premium Invisible Braces & Clear Aligners"
-    services: "Invisalign, Clear Braces, Lingual Braces, Accelerated Ortho"
-    primary_email: "info@premium-austin1.com"
-    secondary_email: "dr.contact@premium-austin1.com"
-    phone: "(512) 555-0065"
-    ad_signals: "Adult aligner market focus, High LTV keywords"
-    avg_case_value: "$3,000-$8,000"
-
+    
   - domain: premium-austin2.com
     location: "Austin, TX"
     niche: premium_orthodontics
     category: "Premium Invisible Braces & Clear Aligners"
-    services: "Invisalign, Clear Braces, Lingual Braces, Accelerated Ortho"
-    primary_email: "info@premium-austin2.com"
-    secondary_email: "dr.contact@premium-austin2.com"
-    phone: "(512) 555-0066"
-    ad_signals: "Adult aligner market focus, High LTV keywords"
-    avg_case_value: "$3,000-$8,000"
-
+    
   - domain: premium-austin3.com
     location: "Austin, TX"
     niche: premium_orthodontics
     category: "Premium Invisible Braces & Clear Aligners"
-    services: "Invisalign, Clear Braces, Lingual Braces, Accelerated Ortho"
-    primary_email: "info@premium-austin3.com"
-    secondary_email: "dr.contact@premium-austin3.com"
-    phone: "(512) 555-0067"
-    ad_signals: "Adult aligner market focus, High LTV keywords"
-    avg_case_value: "$3,000-$8,000"
-
+  
   # Dallas (3)
   - domain: premium-dallas1.com
     location: "Dallas, TX"
     niche: premium_orthodontics
     category: "Premium Invisible Braces & Clear Aligners"
-    services: "Invisalign, Clear Braces, Lingual Braces, Accelerated Ortho"
-    primary_email: "info@premium-dallas1.com"
-    secondary_email: "dr.contact@premium-dallas1.com"
-    phone: "(214) 555-0077"
-    ad_signals: "Adult aligner market focus, High LTV keywords"
-    avg_case_value: "$3,000-$8,000"
-
+    
   - domain: premium-dallas2.com
     location: "Dallas, TX"
     niche: premium_orthodontics
     category: "Premium Invisible Braces & Clear Aligners"
-    services: "Invisalign, Clear Braces, Lingual Braces, Accelerated Ortho"
-    primary_email: "info@premium-dallas2.com"
-    secondary_email: "dr.contact@premium-dallas2.com"
-    phone: "(214) 555-0078"
-    ad_signals: "Adult aligner market focus, High LTV keywords"
-    avg_case_value: "$3,000-$8,000"
-
+    
   - domain: premium-dallas3.com
     location: "Dallas, TX"
     niche: premium_orthodontics
     category: "Premium Invisible Braces & Clear Aligners"
-    services: "Invisalign, Clear Braces, Lingual Braces, Accelerated Ortho"
-    primary_email: "info@premium-dallas3.com"
-    secondary_email: "dr.contact@premium-dallas3.com"
-    phone: "(214) 555-0079"
-    ad_signals: "Adult aligner market focus, High LTV keywords"
-    avg_case_value: "$3,000-$8,000"
-
+  
   # Boston (3)
   - domain: premium-boston1.com
     location: "Boston, MA"
     niche: premium_orthodontics
     category: "Premium Invisible Braces & Clear Aligners"
-    services: "Invisalign, Clear Braces, Lingual Braces, Accelerated Ortho"
-    primary_email: "info@premium-boston1.com"
-    secondary_email: "dr.contact@premium-boston1.com"
-    phone: "(617) 555-0089"
-    ad_signals: "Adult aligner market focus, High LTV keywords"
-    avg_case_value: "$3,000-$8,000"
-
+    
   - domain: premium-boston2.com
     location: "Boston, MA"
     niche: premium_orthodontics
     category: "Premium Invisible Braces & Clear Aligners"
-    services: "Invisalign, Clear Braces, Lingual Braces, Accelerated Ortho"
-    primary_email: "info@premium-boston2.com"
-    secondary_email: "dr.contact@premium-boston2.com"
-    phone: "(617) 555-0090"
-    ad_signals: "Adult aligner market focus, High LTV keywords"
-    avg_case_value: "$3,000-$8,000"
-
+    
   - domain: premium-boston3.com
     location: "Boston, MA"
     niche: premium_orthodontics
     category: "Premium Invisible Braces & Clear Aligners"
-    services: "Invisalign, Clear Braces, Lingual Braces, Accelerated Ortho"
-    primary_email: "info@premium-boston3.com"
-    secondary_email: "dr.contact@premium-boston3.com"
-    phone: "(617) 555-0091"
-    ad_signals: "Adult aligner market focus, High LTV keywords"
-    avg_case_value: "$3,000-$8,000"
 
   # ============================================================
-  # NEW: WEIGHT LOSS / GLP-1 CLINICS (27 targets) ⭐ HOTTEST
+  # WEIGHT LOSS / GLP-1 (27 targets) ⭐ HOTTEST NICHE
   # ============================================================
+  
   # New York (3)
   - domain: weight-newyork1.com
     location: "New York, NY"
     niche: weight_loss_glp1
-    category: "Premium Weight Loss & GLP-1 Therapy Clinics"
-    services: "Semaglutide Therapy, Tirzepatide Program, Functional Medicine"
-    primary_email: "info@weight-newyork1.com"
-    secondary_email: "dr.contact@weight-newyork1.com"
-    phone: "(212) 555-0008"
-    ad_signals: "Aggressive IG/FB landing page campaigns"
-    avg_case_value: "$200-$500/month (high LTV)"
-    market_status: "New entrant, explosive growth"
-
+    category: "Premium Weight Loss & GLP-1 Therapy"
+    
   - domain: weight-newyork2.com
     location: "New York, NY"
     niche: weight_loss_glp1
-    category: "Premium Weight Loss & GLP-1 Therapy Clinics"
-    services: "Semaglutide Therapy, Tirzepatide Program, Functional Medicine"
-    primary_email: "info@weight-newyork2.com"
-    secondary_email: "dr.contact@weight-newyork2.com"
-    phone: "(212) 555-0009"
-    ad_signals: "Aggressive IG/FB landing page campaigns"
-    avg_case_value: "$200-$500/month (high LTV)"
-    market_status: "New entrant, explosive growth"
-
+    category: "Premium Weight Loss & GLP-1 Therapy"
+    
   - domain: weight-newyork3.com
     location: "New York, NY"
     niche: weight_loss_glp1
-    category: "Premium Weight Loss & GLP-1 Therapy Clinics"
-    services: "Semaglutide Therapy, Tirzepatide Program, Functional Medicine"
-    primary_email: "info@weight-newyork3.com"
-    secondary_email: "dr.contact@weight-newyork3.com"
-    phone: "(212) 555-0010"
-    ad_signals: "Aggressive IG/FB landing page campaigns"
-    avg_case_value: "$200-$500/month (high LTV)"
-    market_status: "New entrant, explosive growth"
-
+    category: "Premium Weight Loss & GLP-1 Therapy"
+  
   # Los Angeles (3)
   - domain: weight-losangeles1.com
     location: "Los Angeles, CA"
     niche: weight_loss_glp1
-    category: "Premium Weight Loss & GLP-1 Therapy Clinics"
-    services: "Semaglutide Therapy, Tirzepatide Program, Functional Medicine"
-    primary_email: "info@weight-losangeles1.com"
-    secondary_email: "dr.contact@weight-losangeles1.com"
-    phone: "(310) 555-0020"
-    ad_signals: "Aggressive IG/FB landing page campaigns"
-    avg_case_value: "$200-$500/month (high LTV)"
-    market_status: "New entrant, explosive growth"
-
+    category: "Premium Weight Loss & GLP-1 Therapy"
+    
   - domain: weight-losangeles2.com
     location: "Los Angeles, CA"
     niche: weight_loss_glp1
-    category: "Premium Weight Loss & GLP-1 Therapy Clinics"
-    services: "Semaglutide Therapy, Tirzepatide Program, Functional Medicine"
-    primary_email: "info@weight-losangeles2.com"
-    secondary_email: "dr.contact@weight-losangeles2.com"
-    phone: "(310) 555-0021"
-    ad_signals: "Aggressive IG/FB landing page campaigns"
-    avg_case_value: "$200-$500/month (high LTV)"
-    market_status: "New entrant, explosive growth"
-
+    category: "Premium Weight Loss & GLP-1 Therapy"
+    
   - domain: weight-losangeles3.com
     location: "Los Angeles, CA"
     niche: weight_loss_glp1
-    category: "Premium Weight Loss & GLP-1 Therapy Clinics"
-    services: "Semaglutide Therapy, Tirzepatide Program, Functional Medicine"
-    primary_email: "info@weight-losangeles3.com"
-    secondary_email: "dr.contact@weight-losangeles3.com"
-    phone: "(310) 555-0022"
-    ad_signals: "Aggressive IG/FB landing page campaigns"
-    avg_case_value: "$200-$500/month (high LTV)"
-    market_status: "New entrant, explosive growth"
-
+    category: "Premium Weight Loss & GLP-1 Therapy"
+  
   # Miami (3)
   - domain: weight-miami1.com
     location: "Miami, FL"
     niche: weight_loss_glp1
-    category: "Premium Weight Loss & GLP-1 Therapy Clinics"
-    services: "Semaglutide Therapy, Tirzepatide Program, Functional Medicine"
-    primary_email: "info@weight-miami1.com"
-    secondary_email: "dr.contact@weight-miami1.com"
-    phone: "(305) 555-0032"
-    ad_signals: "Aggressive IG/FB landing page campaigns"
-    avg_case_value: "$200-$500/month (high LTV)"
-    market_status: "New entrant, explosive growth"
-
+    category: "Premium Weight Loss & GLP-1 Therapy"
+    
   - domain: weight-miami2.com
     location: "Miami, FL"
     niche: weight_loss_glp1
-    category: "Premium Weight Loss & GLP-1 Therapy Clinics"
-    services: "Semaglutide Therapy, Tirzepatide Program, Functional Medicine"
-    primary_email: "info@weight-miami2.com"
-    secondary_email: "dr.contact@weight-miami2.com"
-    phone: "(305) 555-0033"
-    ad_signals: "Aggressive IG/FB landing page campaigns"
-    avg_case_value: "$200-$500/month (high LTV)"
-    market_status: "New entrant, explosive growth"
-
+    category: "Premium Weight Loss & GLP-1 Therapy"
+    
   - domain: weight-miami3.com
     location: "Miami, FL"
     niche: weight_loss_glp1
-    category: "Premium Weight Loss & GLP-1 Therapy Clinics"
-    services: "Semaglutide Therapy, Tirzepatide Program, Functional Medicine"
-    primary_email: "info@weight-miami3.com"
-    secondary_email: "dr.contact@weight-miami3.com"
-    phone: "(305) 555-0034"
-    ad_signals: "Aggressive IG/FB landing page campaigns"
-    avg_case_value: "$200-$500/month (high LTV)"
-    market_status: "New entrant, explosive growth"
-
+    category: "Premium Weight Loss & GLP-1 Therapy"
+  
   # Chicago (3)
   - domain: weight-chicago1.com
     location: "Chicago, IL"
     niche: weight_loss_glp1
-    category: "Premium Weight Loss & GLP-1 Therapy Clinics"
-    services: "Semaglutide Therapy, Tirzepatide Program, Functional Medicine"
-    primary_email: "info@weight-chicago1.com"
-    secondary_email: "dr.contact@weight-chicago1.com"
-    phone: "(312) 555-0044"
-    ad_signals: "Aggressive IG/FB landing page campaigns"
-    avg_case_value: "$200-$500/month (high LTV)"
-    market_status: "New entrant, explosive growth"
-
+    category: "Premium Weight Loss & GLP-1 Therapy"
+    
   - domain: weight-chicago2.com
     location: "Chicago, IL"
     niche: weight_loss_glp1
-    category: "Premium Weight Loss & GLP-1 Therapy Clinics"
-    services: "Semaglutide Therapy, Tirzepatide Program, Functional Medicine"
-    primary_email: "info@weight-chicago2.com"
-    secondary_email: "dr.contact@weight-chicago2.com"
-    phone: "(312) 555-0045"
-    ad_signals: "Aggressive IG/FB landing page campaigns"
-    avg_case_value: "$200-$500/month (high LTV)"
-    market_status: "New entrant, explosive growth"
-
+    category: "Premium Weight Loss & GLP-1 Therapy"
+    
   - domain: weight-chicago3.com
     location: "Chicago, IL"
     niche: weight_loss_glp1
-    category: "Premium Weight Loss & GLP-1 Therapy Clinics"
-    services: "Semaglutide Therapy, Tirzepatide Program, Functional Medicine"
-    primary_email: "info@weight-chicago3.com"
-    secondary_email: "dr.contact@weight-chicago3.com"
-    phone: "(312) 555-0046"
-    ad_signals: "Aggressive IG/FB landing page campaigns"
-    avg_case_value: "$200-$500/month (high LTV)"
-    market_status: "New entrant, explosive growth"
-
+    category: "Premium Weight Loss & GLP-1 Therapy"
+  
   # San Francisco (3)
   - domain: weight-sanfrancisco1.com
     location: "San Francisco, CA"
     niche: weight_loss_glp1
-    category: "Premium Weight Loss & GLP-1 Therapy Clinics"
-    services: "Semaglutide Therapy, Tirzepatide Program, Functional Medicine"
-    primary_email: "info@weight-sanfrancisco1.com"
-    secondary_email: "dr.contact@weight-sanfrancisco1.com"
-    phone: "(310) 555-0056"
-    ad_signals: "Aggressive IG/FB landing page campaigns"
-    avg_case_value: "$200-$500/month (high LTV)"
-    market_status: "New entrant, explosive growth"
-
+    category: "Premium Weight Loss & GLP-1 Therapy"
+    
   - domain: weight-sanfrancisco2.com
     location: "San Francisco, CA"
     niche: weight_loss_glp1
-    category: "Premium Weight Loss & GLP-1 Therapy Clinics"
-    services: "Semaglutide Therapy, Tirzepatide Program, Functional Medicine"
-    primary_email: "info@weight-sanfrancisco2.com"
-    secondary_email: "dr.contact@weight-sanfrancisco2.com"
-    phone: "(310) 555-0057"
-    ad_signals: "Aggressive IG/FB landing page campaigns"
-    avg_case_value: "$200-$500/month (high LTV)"
-    market_status: "New entrant, explosive growth"
-
+    category: "Premium Weight Loss & GLP-1 Therapy"
+    
   - domain: weight-sanfrancisco3.com
     location: "San Francisco, CA"
     niche: weight_loss_glp1
-    category: "Premium Weight Loss & GLP-1 Therapy Clinics"
-    services: "Semaglutide Therapy, Tirzepatide Program, Functional Medicine"
-    primary_email: "info@weight-sanfrancisco3.com"
-    secondary_email: "dr.contact@weight-sanfrancisco3.com"
-    phone: "(310) 555-0058"
-    ad_signals: "Aggressive IG/FB landing page campaigns"
-    avg_case_value: "$200-$500/month (high LTV)"
-    market_status: "New entrant, explosive growth"
-
+    category: "Premium Weight Loss & GLP-1 Therapy"
+  
   # Austin (3)
   - domain: weight-austin1.com
     location: "Austin, TX"
     niche: weight_loss_glp1
-    category: "Premium Weight Loss & GLP-1 Therapy Clinics"
-    services: "Semaglutide Therapy, Tirzepatide Program, Functional Medicine"
-    primary_email: "info@weight-austin1.com"
-    secondary_email: "dr.contact@weight-austin1.com"
-    phone: "(512) 555-0068"
-    ad_signals: "Aggressive IG/FB landing page campaigns"
-    avg_case_value: "$200-$500/month (high LTV)"
-    market_status: "New entrant, explosive growth"
-
+    category: "Premium Weight Loss & GLP-1 Therapy"
+    
   - domain: weight-austin2.com
     location: "Austin, TX"
     niche: weight_loss_glp1
-    category: "Premium Weight Loss & GLP-1 Therapy Clinics"
-    services: "Semaglutide Therapy, Tirzepatide Program, Functional Medicine"
-    primary_email: "info@weight-austin2.com"
-    secondary_email: "dr.contact@weight-austin2.com"
-    phone: "(512) 555-0069"
-    ad_signals: "Aggressive IG/FB landing page campaigns"
-    avg_case_value: "$200-$500/month (high LTV)"
-    market_status: "New entrant, explosive growth"
-
+    category: "Premium Weight Loss & GLP-1 Therapy"
+    
   - domain: weight-austin3.com
     location: "Austin, TX"
     niche: weight_loss_glp1
-    category: "Premium Weight Loss & GLP-1 Therapy Clinics"
-    services: "Semaglutide Therapy, Tirzepatide Program, Functional Medicine"
-    primary_email: "info@weight-austin3.com"
-    secondary_email: "dr.contact@weight-austin3.com"
-    phone: "(512) 555-0070"
-    ad_signals: "Aggressive IG/FB landing page campaigns"
-    avg_case_value: "$200-$500/month (high LTV)"
-    market_status: "New entrant, explosive growth"
-
+    category: "Premium Weight Loss & GLP-1 Therapy"
+  
   # Dallas (3)
   - domain: weight-dallas1.com
     location: "Dallas, TX"
     niche: weight_loss_glp1
-    category: "Premium Weight Loss & GLP-1 Therapy Clinics"
-    services: "Semaglutide Therapy, Tirzepatide Program, Functional Medicine"
-    primary_email: "info@weight-dallas1.com"
-    secondary_email: "dr.contact@weight-dallas1.com"
-    phone: "(214) 555-0080"
-    ad_signals: "Aggressive IG/FB landing page campaigns"
-    avg_case_value: "$200-$500/month (high LTV)"
-    market_status: "New entrant, explosive growth"
-
+    category: "Premium Weight Loss & GLP-1 Therapy"
+    
   - domain: weight-dallas2.com
     location: "Dallas, TX"
     niche: weight_loss_glp1
-    category: "Premium Weight Loss & GLP-1 Therapy Clinics"
-    services: "Semaglutide Therapy, Tirzepatide Program, Functional Medicine"
-    primary_email: "info@weight-dallas2.com"
-    secondary_email: "dr.contact@weight-dallas2.com"
-    phone: "(214) 555-0081"
-    ad_signals: "Aggressive IG/FB landing page campaigns"
-    avg_case_value: "$200-$500/month (high LTV)"
-    market_status: "New entrant, explosive growth"
-
+    category: "Premium Weight Loss & GLP-1 Therapy"
+    
   - domain: weight-dallas3.com
     location: "Dallas, TX"
     niche: weight_loss_glp1
-    category: "Premium Weight Loss & GLP-1 Therapy Clinics"
-    services: "Semaglutide Therapy, Tirzepatide Program, Functional Medicine"
-    primary_email: "info@weight-dallas3.com"
-    secondary_email: "dr.contact@weight-dallas3.com"
-    phone: "(214) 555-0082"
-    ad_signals: "Aggressive IG/FB landing page campaigns"
-    avg_case_value: "$200-$500/month (high LTV)"
-    market_status: "New entrant, explosive growth"
-
+    category: "Premium Weight Loss & GLP-1 Therapy"
+  
   # Boston (3)
   - domain: weight-boston1.com
     location: "Boston, MA"
     niche: weight_loss_glp1
-    category: "Premium Weight Loss & GLP-1 Therapy Clinics"
-    services: "Semaglutide Therapy, Tirzepatide Program, Functional Medicine"
-    primary_email: "info@weight-boston1.com"
-    secondary_email: "dr.contact@weight-boston1.com"
-    phone: "(617) 555-0092"
-    ad_signals: "Aggressive IG/FB landing page campaigns"
-    avg_case_value: "$200-$500/month (high LTV)"
-    market_status: "New entrant, explosive growth"
-
+    category: "Premium Weight Loss & GLP-1 Therapy"
+    
   - domain: weight-boston2.com
     location: "Boston, MA"
     niche: weight_loss_glp1
-    category: "Premium Weight Loss & GLP-1 Therapy Clinics"
-    services: "Semaglutide Therapy, Tirzepatide Program, Functional Medicine"
-    primary_email: "info@weight-boston2.com"
-    secondary_email: "dr.contact@weight-boston2.com"
-    phone: "(617) 555-0093"
-    ad_signals: "Aggressive IG/FB landing page campaigns"
-    avg_case_value: "$200-$500/month (high LTV)"
-    market_status: "New entrant, explosive growth"
-
+    category: "Premium Weight Loss & GLP-1 Therapy"
+    
   - domain: weight-boston3.com
     location: "Boston, MA"
     niche: weight_loss_glp1
-    category: "Premium Weight Loss & GLP-1 Therapy Clinics"
-    services: "Semaglutide Therapy, Tirzepatide Program, Functional Medicine"
-    primary_email: "info@weight-boston3.com"
-    secondary_email: "dr.contact@weight-boston3.com"
-    phone: "(617) 555-0094"
-    ad_signals: "Aggressive IG/FB landing page campaigns"
-    avg_case_value: "$200-$500/month (high LTV)"
-    market_status: "New entrant, explosive growth"
+    category: "Premium Weight Loss & GLP-1 Therapy"
 
   # ============================================================
-  # NEW: PREMIUM HAIR RESTORATION (24 targets)
+  # PREMIUM HAIR RESTORATION (24 targets)
   # ============================================================
+  
   # New York (3)
-  - domain: premium-newyork1.com
+  - domain: hair-newyork1.com
     location: "New York, NY"
     niche: premium_hair_restoration
-    category: "Premium Hair Restoration & Transplant Clinics"
-    services: "FUE Hair Transplant, PRP Therapy, Scalp Micropigmentation"
-    primary_email: "info@premium-newyork1.com"
-    secondary_email: "dr.contact@premium-newyork1.com"
-    phone: "(212) 555-0011"
-    ad_signals: "YouTube, Google Display comprehensive paid ads"
-    avg_case_value: "$8,000-$15,000"
-
-  - domain: premium-newyork2.com
+    category: "Premium Hair Restoration & Transplant"
+    
+  - domain: hair-newyork2.com
     location: "New York, NY"
     niche: premium_hair_restoration
-    category: "Premium Hair Restoration & Transplant Clinics"
-    services: "FUE Hair Transplant, PRP Therapy, Scalp Micropigmentation"
-    primary_email: "info@premium-newyork2.com"
-    secondary_email: "dr.contact@premium-newyork2.com"
-    phone: "(212) 555-0012"
-    ad_signals: "YouTube, Google Display comprehensive paid ads"
-    avg_case_value: "$8,000-$15,000"
-
-  - domain: premium-newyork3.com
+    category: "Premium Hair Restoration & Transplant"
+    
+  - domain: hair-newyork3.com
     location: "New York, NY"
     niche: premium_hair_restoration
-    category: "Premium Hair Restoration & Transplant Clinics"
-    services: "FUE Hair Transplant, PRP Therapy, Scalp Micropigmentation"
-    primary_email: "info@premium-newyork3.com"
-    secondary_email: "dr.contact@premium-newyork3.com"
-    phone: "(212) 555-0013"
-    ad_signals: "YouTube, Google Display comprehensive paid ads"
-    avg_case_value: "$8,000-$15,000"
-
+    category: "Premium Hair Restoration & Transplant"
+  
   # Los Angeles (3)
-  - domain: premium-losangeles1.com
+  - domain: hair-losangeles1.com
     location: "Los Angeles, CA"
     niche: premium_hair_restoration
-    category: "Premium Hair Restoration & Transplant Clinics"
-    services: "FUE Hair Transplant, PRP Therapy, Scalp Micropigmentation"
-    primary_email: "info@premium-losangeles1.com"
-    secondary_email: "dr.contact@premium-losangeles1.com"
-    phone: "(310) 555-0023"
-    ad_signals: "YouTube, Google Display comprehensive paid ads"
-    avg_case_value: "$8,000-$15,000"
-
-  - domain: premium-losangeles2.com
+    category: "Premium Hair Restoration & Transplant"
+    
+  - domain: hair-losangeles2.com
     location: "Los Angeles, CA"
     niche: premium_hair_restoration
-    category: "Premium Hair Restoration & Transplant Clinics"
-    services: "FUE Hair Transplant, PRP Therapy, Scalp Micropigmentation"
-    primary_email: "info@premium-losangeles2.com"
-    secondary_email: "dr.contact@premium-losangeles2.com"
-    phone: "(310) 555-0024"
-    ad_signals: "YouTube, Google Display comprehensive paid ads"
-    avg_case_value: "$8,000-$15,000"
-
-  - domain: premium-losangeles3.com
+    category: "Premium Hair Restoration & Transplant"
+    
+  - domain: hair-losangeles3.com
     location: "Los Angeles, CA"
     niche: premium_hair_restoration
-    category: "Premium Hair Restoration & Transplant Clinics"
-    services: "FUE Hair Transplant, PRP Therapy, Scalp Micropigmentation"
-    primary_email: "info@premium-losangeles3.com"
-    secondary_email: "dr.contact@premium-losangeles3.com"
-    phone: "(310) 555-0025"
-    ad_signals: "YouTube, Google Display comprehensive paid ads"
-    avg_case_value: "$8,000-$15,000"
-
+    category: "Premium Hair Restoration & Transplant"
+  
   # Miami (3)
-  - domain: premium-miami1.com
+  - domain: hair-miami1.com
     location: "Miami, FL"
     niche: premium_hair_restoration
-    category: "Premium Hair Restoration & Transplant Clinics"
-    services: "FUE Hair Transplant, PRP Therapy, Scalp Micropigmentation"
-    primary_email: "info@premium-miami1.com"
-    secondary_email: "dr.contact@premium-miami1.com"
-    phone: "(305) 555-0035"
-    ad_signals: "YouTube, Google Display comprehensive paid ads"
-    avg_case_value: "$8,000-$15,000"
-
-  - domain: premium-miami2.com
+    category: "Premium Hair Restoration & Transplant"
+    
+  - domain: hair-miami2.com
     location: "Miami, FL"
     niche: premium_hair_restoration
-    category: "Premium Hair Restoration & Transplant Clinics"
-    services: "FUE Hair Transplant, PRP Therapy, Scalp Micropigmentation"
-    primary_email: "info@premium-miami2.com"
-    secondary_email: "dr.contact@premium-miami2.com"
-    phone: "(305) 555-0036"
-    ad_signals: "YouTube, Google Display comprehensive paid ads"
-    avg_case_value: "$8,000-$15,000"
-
-  - domain: premium-miami3.com
+    category: "Premium Hair Restoration & Transplant"
+    
+  - domain: hair-miami3.com
     location: "Miami, FL"
     niche: premium_hair_restoration
-    category: "Premium Hair Restoration & Transplant Clinics"
-    services: "FUE Hair Transplant, PRP Therapy, Scalp Micropigmentation"
-    primary_email: "info@premium-miami3.com"
-    secondary_email: "dr.contact@premium-miami3.com"
-    phone: "(305) 555-0037"
-    ad_signals: "YouTube, Google Display comprehensive paid ads"
-    avg_case_value: "$8,000-$15,000"
-
+    category: "Premium Hair Restoration & Transplant"
+  
   # Chicago (3)
-  - domain: premium-chicago1.com
+  - domain: hair-chicago1.com
     location: "Chicago, IL"
     niche: premium_hair_restoration
-    category: "Premium Hair Restoration & Transplant Clinics"
-    services: "FUE Hair Transplant, PRP Therapy, Scalp Micropigmentation"
-    primary_email: "info@premium-chicago1.com"
-    secondary_email: "dr.contact@premium-chicago1.com"
-    phone: "(312) 555-0047"
-    ad_signals: "YouTube, Google Display comprehensive paid ads"
-    avg_case_value: "$8,000-$15,000"
-
-  - domain: premium-chicago2.com
+    category: "Premium Hair Restoration & Transplant"
+    
+  - domain: hair-chicago2.com
     location: "Chicago, IL"
     niche: premium_hair_restoration
-    category: "Premium Hair Restoration & Transplant Clinics"
-    services: "FUE Hair Transplant, PRP Therapy, Scalp Micropigmentation"
-    primary_email: "info@premium-chicago2.com"
-    secondary_email: "dr.contact@premium-chicago2.com"
-    phone: "(312) 555-0048"
-    ad_signals: "YouTube, Google Display comprehensive paid ads"
-    avg_case_value: "$8,000-$15,000"
-
-  - domain: premium-chicago3.com
+    category: "Premium Hair Restoration & Transplant"
+    
+  - domain: hair-chicago3.com
     location: "Chicago, IL"
     niche: premium_hair_restoration
-    category: "Premium Hair Restoration & Transplant Clinics"
-    services: "FUE Hair Transplant, PRP Therapy, Scalp Micropigmentation"
-    primary_email: "info@premium-chicago3.com"
-    secondary_email: "dr.contact@premium-chicago3.com"
-    phone: "(312) 555-0049"
-    ad_signals: "YouTube, Google Display comprehensive paid ads"
-    avg_case_value: "$8,000-$15,000"
-
+    category: "Premium Hair Restoration & Transplant"
+  
   # San Francisco (3)
-  - domain: premium-sanfrancisco1.com
+  - domain: hair-sanfrancisco1.com
     location: "San Francisco, CA"
     niche: premium_hair_restoration
-    category: "Premium Hair Restoration & Transplant Clinics"
-    services: "FUE Hair Transplant, PRP Therapy, Scalp Micropigmentation"
-    primary_email: "info@premium-sanfrancisco1.com"
-    secondary_email: "dr.contact@premium-sanfrancisco1.com"
-    phone: "(310) 555-0059"
-    ad_signals: "YouTube, Google Display comprehensive paid ads"
-    avg_case_value: "$8,000-$15,000"
-
-  - domain: premium-sanfrancisco2.com
+    category: "Premium Hair Restoration & Transplant"
+    
+  - domain: hair-sanfrancisco2.com
     location: "San Francisco, CA"
     niche: premium_hair_restoration
-    category: "Premium Hair Restoration & Transplant Clinics"
-    services: "FUE Hair Transplant, PRP Therapy, Scalp Micropigmentation"
-    primary_email: "info@premium-sanfrancisco2.com"
-    secondary_email: "dr.contact@premium-sanfrancisco2.com"
-    phone: "(310) 555-0060"
-    ad_signals: "YouTube, Google Display comprehensive paid ads"
-    avg_case_value: "$8,000-$15,000"
-
-  - domain: premium-sanfrancisco3.com
+    category: "Premium Hair Restoration & Transplant"
+    
+  - domain: hair-sanfrancisco3.com
     location: "San Francisco, CA"
     niche: premium_hair_restoration
-    category: "Premium Hair Restoration & Transplant Clinics"
-    services: "FUE Hair Transplant, PRP Therapy, Scalp Micropigmentation"
-    primary_email: "info@premium-sanfrancisco3.com"
-    secondary_email: "dr.contact@premium-sanfrancisco3.com"
-    phone: "(310) 555-0061"
-    ad_signals: "YouTube, Google Display comprehensive paid ads"
-    avg_case_value: "$8,000-$15,000"
-
+    category: "Premium Hair Restoration & Transplant"
+  
   # Austin (3)
-  - domain: premium-austin1.com
+  - domain: hair-austin1.com
     location: "Austin, TX"
     niche: premium_hair_restoration
-    category: "Premium Hair Restoration & Transplant Clinics"
-    services: "FUE Hair Transplant, PRP Therapy, Scalp Micropigmentation"
-    primary_email: "info@premium-austin1.com"
-    secondary_email: "dr.contact@premium-austin1.com"
-    phone: "(512) 555-0071"
-    ad_signals: "YouTube, Google Display comprehensive paid ads"
-    avg_case_value: "$8,000-$15,000"
-
-  - domain: premium-austin2.com
+    category: "Premium Hair Restoration & Transplant"
+    
+  - domain: hair-austin2.com
     location: "Austin, TX"
     niche: premium_hair_restoration
-    category: "Premium Hair Restoration & Transplant Clinics"
-    services: "FUE Hair Transplant, PRP Therapy, Scalp Micropigmentation"
-    primary_email: "info@premium-austin2.com"
-    secondary_email: "dr.contact@premium-austin2.com"
-    phone: "(512) 555-0072"
-    ad_signals: "YouTube, Google Display comprehensive paid ads"
-    avg_case_value: "$8,000-$15,000"
-
-  - domain: premium-austin3.com
+    category: "Premium Hair Restoration & Transplant"
+    
+  - domain: hair-austin3.com
     location: "Austin, TX"
     niche: premium_hair_restoration
-    category: "Premium Hair Restoration & Transplant Clinics"
-    services: "FUE Hair Transplant, PRP Therapy, Scalp Micropigmentation"
-    primary_email: "info@premium-austin3.com"
-    secondary_email: "dr.contact@premium-austin3.com"
-    phone: "(512) 555-0073"
-    ad_signals: "YouTube, Google Display comprehensive paid ads"
-    avg_case_value: "$8,000-$15,000"
-
+    category: "Premium Hair Restoration & Transplant"
+  
   # Dallas (3)
-  - domain: premium-dallas1.com
+  - domain: hair-dallas1.com
     location: "Dallas, TX"
     niche: premium_hair_restoration
-    category: "Premium Hair Restoration & Transplant Clinics"
-    services: "FUE Hair Transplant, PRP Therapy, Scalp Micropigmentation"
-    primary_email: "info@premium-dallas1.com"
-    secondary_email: "dr.contact@premium-dallas1.com"
-    phone: "(214) 555-0083"
-    ad_signals: "YouTube, Google Display comprehensive paid ads"
-    avg_case_value: "$8,000-$15,000"
-
-  - domain: premium-dallas2.com
+    category: "Premium Hair Restoration & Transplant"
+    
+  - domain: hair-dallas2.com
     location: "Dallas, TX"
     niche: premium_hair_restoration
-    category: "Premium Hair Restoration & Transplant Clinics"
-    services: "FUE Hair Transplant, PRP Therapy, Scalp Micropigmentation"
-    primary_email: "info@premium-dallas2.com"
-    secondary_email: "dr.contact@premium-dallas2.com"
-    phone: "(214) 555-0084"
-    ad_signals: "YouTube, Google Display comprehensive paid ads"
-    avg_case_value: "$8,000-$15,000"
-
-  - domain: premium-dallas3.com
+    category: "Premium Hair Restoration & Transplant"
+    
+  - domain: hair-dallas3.com
     location: "Dallas, TX"
     niche: premium_hair_restoration
-    category: "Premium Hair Restoration & Transplant Clinics"
-    services: "FUE Hair Transplant, PRP Therapy, Scalp Micropigmentation"
-    primary_email: "info@premium-dallas3.com"
-    secondary_email: "dr.contact@premium-dallas3.com"
-    phone: "(214) 555-0085"
-    ad_signals: "YouTube, Google Display comprehensive paid ads"
-    avg_case_value: "$8,000-$15,000"
-
+    category: "Premium Hair Restoration & Transplant"
+  
   # Boston (3)
-  - domain: premium-boston1.com
+  - domain: hair-boston1.com
     location: "Boston, MA"
     niche: premium_hair_restoration
-    category: "Premium Hair Restoration & Transplant Clinics"
-    services: "FUE Hair Transplant, PRP Therapy, Scalp Micropigmentation"
-    primary_email: "info@premium-boston1.com"
-    secondary_email: "dr.contact@premium-boston1.com"
-    phone: "(617) 555-0095"
-    ad_signals: "YouTube, Google Display comprehensive paid ads"
-    avg_case_value: "$8,000-$15,000"
-
-  - domain: premium-boston2.com
+    category: "Premium Hair Restoration & Transplant"
+    
+  - domain: hair-boston2.com
     location: "Boston, MA"
     niche: premium_hair_restoration
-    category: "Premium Hair Restoration & Transplant Clinics"
-    services: "FUE Hair Transplant, PRP Therapy, Scalp Micropigmentation"
-    primary_email: "info@premium-boston2.com"
-    secondary_email: "dr.contact@premium-boston2.com"
-    phone: "(617) 555-0096"
-    ad_signals: "YouTube, Google Display comprehensive paid ads"
-    avg_case_value: "$8,000-$15,000"
-
-  - domain: premium-boston3.com
+    category: "Premium Hair Restoration & Transplant"
+    
+  - domain: hair-boston3.com
     location: "Boston, MA"
     niche: premium_hair_restoration
-    category: "Premium Hair Restoration & Transplant Clinics"
-    services: "FUE Hair Transplant, PRP Therapy, Scalp Micropigmentation"
-    primary_email: "info@premium-boston3.com"
-    secondary_email: "dr.contact@premium-boston3.com"
-    phone: "(617) 555-0097"
-    ad_signals: "YouTube, Google Display comprehensive paid ads"
-    avg_case_value: "$8,000-$15,000"
+    category: "Premium Hair Restoration & Transplant"
 
-# ============================================================
-# METADATA
-# ============================================================
 metadata:
   total_targets: 111
   breakdown:
-    plastic_surgery: 6
     cosmetic_dentistry: 27
     premium_orthodontics: 27
     weight_loss_glp1: 27
     premium_hair_restoration: 24
-  
   cities: 8
-  regions:
-    northeast: "New York, Boston"
-    southeast: "Miami"
-    midwest: "Chicago"
-    south: "Austin, Dallas"
-    west: "Los Angeles, San Francisco"
-  
-  strategy_notes: |
-    Primary target: Weight Loss / GLP-1 (hottest market, explosive growth, high LTV)
-    Secondary: Cosmetic Dentistry + Premium Orthodontics (proven conversion tracking issues)
-    Tertiary: Hair Restoration (consistent demand, premium pricing)
-    
-    All clinics filtered for:
-    - High average case value ($3K-$15K per patient)
-    - Active paid advertising (Google Ads, Meta, YouTube)
-    - Conversion tracking problems (our wedge)
-    - Premium positioning (can afford professional services)
-    
-    Outreach sequence:
-    1. Weight Loss clinics (highest intent, fastest sales cycle)
-    2. Cosmetic Dentistry (proven pain point)
-    3. Premium Orthodontics (high volume, consistent need)
-    4. Hair Restoration (emotional + premium pricing)
+  regions: ["NY", "CA", "FL", "IL", "TX", "MA"]
