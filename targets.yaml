@@ -1,20 +1,58 @@
-meta:
-  generated_by: "Idin - Apex Market Intelligence"
-  version: "1.0"
+# targets.yaml
+# Apex Market Intelligence - Target Configuration
+# Built by Idin Iskandar
 
-categories:
-  - name: "Premium Plastic Surgery & Aesthetic Clinics"
+# Niche config: ditambah cosmetic_dentistry, high_ticket_contractor, premium_gym
+# Setiap target wajib punya: domain, location, niche, category
+
+targets:
+  # ============================================================
+  # MEDICAL HIGH TICKET - Plastic Surgery & Aesthetic Clinics
+  # ============================================================
+  - domain: shaferplasticsurgery.com
+    location: "New York, NY"
     niche: medical_high_ticket
-    targets:
-      - domain: "nygplasticsurgery.com"
-        location: "New York, NY"
-      - domain: "careplasticsurgery.com"
-        location: "Chicago, IL"
-      - domain: "shaferplasticsurgery.com"
-        location: "New York, NY"
-      - domain: "visagefacialsurgery.com"
-        location: "San Francisco, CA"
-      - domain: "miamiaesthetic.com"
-        location: "Miami, FL"
-      - domain: "liuplasticsurgery.com"
-        location: "Cupertino, CA"
+    category: "Premium Plastic Surgery & Aesthetic Clinics"
+
+  - domain: miamiaesthetic.com
+    location: "Miami, FL"
+    niche: medical_high_ticket
+    category: "Premium Plastic Surgery & Aesthetic Clinics"
+
+  - domain: nygplasticsurgery.com
+    location: "New York, NY"
+    niche: medical_high_ticket
+    category: "Premium Plastic Surgery & Aesthetic Clinics"
+
+  - domain: careplasticsurgery.com
+    location: "Chicago, IL"
+    niche: medical_high_ticket
+    category: "Premium Plastic Surgery & Aesthetic Clinics"
+
+  - domain: visagefacialsurgery.com
+    location: "San Francisco, CA"
+    niche: medical_high_ticket
+    category: "Premium Plastic Surgery & Aesthetic Clinics"
+
+  - domain: liuplasticsurgery.com
+    location: "Cupertino, CA"
+    niche: medical_high_ticket
+    category: "Premium Plastic Surgery & Aesthetic Clinics"
+
+  # ============================================================
+  # Tambah lebih banyak target di sini sesuai kebutuhan:
+  # ============================================================
+  # - domain: example-dentist.com
+  #   location: "Los Angeles, CA"
+  #   niche: cosmetic_dentistry
+  #   category: "Premium Cosmetic Dentistry"
+  #
+  # - domain: example-contractor.com
+  #   location: "Austin, TX"
+  #   niche: high_ticket_contractor
+  #   category: "Luxury Home Renovation"
+  #
+  # - domain: example-gym.com
+  #   location: "Beverly Hills, CA"
+  #   niche: premium_gym
+  #   category: "Luxury Fitness & Wellness"
