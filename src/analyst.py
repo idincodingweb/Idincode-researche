@@ -1,8 +1,14 @@
 # src/analyst.py
-"""Claude AI Analyst Layer (via kie.ai — OpenAI-compatible proxy).
+"""Claude AI Analyst Layer via kie.ai (Anthropic-native format).
 
 Generate gold_reasons + outreach_angle untuk setiap qualified lead.
 Graceful fallback ke deterministic template kalau API fail.
+
+ARSITEKTUR:
+- Endpoint: POST https://api.kie.ai/claude/v1/messages
+- Format: Anthropic-native (system di top-level, bukan di messages array)
+- Auth: Bearer token via IDINCODE_API env var
+- Response parsing: data["content"][0]["text"]
 """
 from __future__ import annotations
 
@@ -16,7 +22,9 @@ import httpx
 from src.config import (
     IDINCODE_API,
     KIE_AI_BASE_URL,
+    KIE_AI_MESSAGES_PATH,
     KIE_AI_MODEL,
+    KIE_AI_THINKING,
 )
 from src.models import QualifiedLead
 
@@ -49,43 +57,51 @@ async def enrich_with_ai_analyst(
         return _apply_fallback_to_all(leads)
 
     enriched: list[QualifiedLead] = []
+    matched = 0
     for lead in leads:
         ai_data = ai_results.get(lead.domain)
         if ai_data and isinstance(ai_data, dict):
             lead.gold_reasons = ai_data.get("gold_reasons") or _fallback_reasons(lead)
             lead.outreach_angle = ai_data.get("outreach_angle") or _fallback_outreach(lead)
+            if ai_data.get("gold_reasons"):
+                matched += 1
         else:
             lead.gold_reasons = _fallback_reasons(lead)
             lead.outreach_angle = _fallback_outreach(lead)
         enriched.append(lead)
 
-    print(f"[analyst] OK: AI reasoning generated untuk {len(enriched)} leads")
+    print(f"[analyst] OK: AI reasoning generated untuk {matched}/{len(enriched)} leads")
     return enriched
 
 
 # ============================================================
-# kie.ai API call (OpenAI-compatible format)
+# kie.ai API call (Anthropic-native format)
 # ============================================================
 async def _call_claude_batch(
     leads: list[QualifiedLead],
     *,
     max_retries: int,
 ) -> dict[str, dict[str, str]]:
-    """Call kie.ai endpoint /v1/chat/completions (OpenAI-compatible).
-    
+    """Call kie.ai endpoint /claude/v1/messages (Anthropic-native).
+
     Return dict {domain: {gold_reasons, outreach_angle}}.
     """
     system_prompt = _build_system_prompt(leads)
     user_prompt = _build_user_prompt(leads)
 
+    # PENTING: Format Anthropic-native
+    # - "system" di top-level (BUKAN di messages array dengan role:system)
+    # - "messages" cuma berisi role: user/assistant
+    # - "thinkingFlag" & "stream" adalah extension proprietary kie.ai
     payload = {
         "model": KIE_AI_MODEL,
-        "max_tokens": 4000,
-        "temperature": 0.4,
+        "max_tokens": 4096,
+        "system": system_prompt,
         "messages": [
-            {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt},
         ],
+        "thinkingFlag": KIE_AI_THINKING,
+        "stream": False,
     }
 
     headers = {
@@ -93,22 +109,26 @@ async def _call_claude_batch(
         "Content-Type": "application/json",
     }
 
-    url = f"{KIE_AI_BASE_URL.rstrip('/')}/chat/completions"
+    url = f"{KIE_AI_BASE_URL.rstrip('/')}{KIE_AI_MESSAGES_PATH}"
 
     last_error: Exception | None = None
     for attempt in range(max_retries + 1):
         try:
-            async with httpx.AsyncClient(timeout=60.0) as client:
+            async with httpx.AsyncClient(timeout=90.0) as client:
                 resp = await client.post(url, json=payload, headers=headers)
 
             if resp.status_code == 200:
                 data = resp.json()
                 text = _extract_text_from_response(data)
+                if not text:
+                    raise ValueError(f"Empty text from response: {str(data)[:300]}")
+
                 parsed = _parse_json_response(text)
                 if parsed:
                     return parsed
-                raise ValueError("Empty or invalid JSON from Claude")
+                raise ValueError(f"Failed to parse JSON. Raw text: {text[:300]}")
 
+            # Retry-able errors
             if resp.status_code in (429, 500, 502, 503, 504):
                 last_error = RuntimeError(
                     f"HTTP {resp.status_code}: {resp.text[:200]}"
@@ -120,7 +140,8 @@ async def _call_claude_batch(
                     continue
                 raise last_error
 
-            raise RuntimeError(f"HTTP {resp.status_code}: {resp.text[:200]}")
+            # Non-retry error (400, 401, 403, 404)
+            raise RuntimeError(f"HTTP {resp.status_code}: {resp.text[:300]}")
 
         except httpx.TimeoutException as e:
             last_error = e
@@ -137,7 +158,7 @@ async def _call_claude_batch(
 
 
 # ============================================================
-# Dynamic Prompt Builder (FIX: gak hardcoded plastic surgery lagi)
+# Dynamic Prompt Builder (per-niche context)
 # ============================================================
 _NICHE_CONTEXT: dict[str, dict[str, str]] = {
     "medical_high_ticket": {
@@ -192,7 +213,7 @@ def _build_system_prompt(leads: list[QualifiedLead]) -> str:
         f"Your output is used by agencies to cold-pitch services to these businesses. "
         f"Be SPECIFIC, ACTIONABLE, and slightly URGENT.\n\n"
         "Rules:\n"
-        "1. Output ONLY valid JSON. No markdown fences, no preamble.\n"
+        "1. Output ONLY valid JSON. No markdown fences, no preamble, no explanation.\n"
         "2. For each domain, generate:\n"
         "   - gold_reasons (1-2 sentences): WHY this is a hot lead. Reference "
         "specific gaps with concrete impact (revenue, attribution clarity, ROAS).\n"
@@ -244,31 +265,62 @@ def _build_user_prompt(leads: list[QualifiedLead]) -> str:
         )
 
     lines.append(
-        "\nRemember: output ONLY the JSON object, no markdown, no explanation."
+        "\nRemember: output ONLY the JSON object, no markdown fences, no explanation."
     )
     return "\n".join(lines)
 
 
 # ============================================================
-# Response parsing (OpenAI-compatible format)
+# Response parsing (Anthropic-native format)
 # ============================================================
 def _extract_text_from_response(data: dict[str, Any]) -> str:
-    """Extract text dari OpenAI-compatible response format."""
-    choices = data.get("choices")
-    if isinstance(choices, list) and choices:
-        msg = choices[0].get("message", {})
-        content = msg.get("content", "")
-        if isinstance(content, str) and content:
-            return content
+    """Extract text dari Anthropic-native response format.
+
+    Expected structure:
+    {
+        "id": "msg_...",
+        "type": "message",
+        "role": "assistant",
+        "content": [
+            {"type": "text", "text": "..."}
+        ],
+        ...
+    }
+
+    Defensive: handle juga kalau ada thinking block (kalau thinkingFlag=true)
+    yang muncul SEBELUM text block.
+    """
+    content = data.get("content")
+    if not isinstance(content, list) or not content:
+        return ""
+
+    # Cari block pertama yang type == "text" (skip thinking blocks)
+    for block in content:
+        if not isinstance(block, dict):
+            continue
+        block_type = block.get("type")
+        if block_type == "text":
+            text = block.get("text", "")
+            if isinstance(text, str) and text:
+                return text
+
+    # Fallback: kalau gak ada type field, coba ambil text dari block pertama
+    first = content[0]
+    if isinstance(first, dict):
+        text = first.get("text", "")
+        if isinstance(text, str):
+            return text
+
     return ""
 
 
 def _parse_json_response(text: str) -> dict[str, dict[str, str]]:
-    """Parse JSON dari response. Strip markdown kalau ada (defensive)."""
+    """Parse JSON dari response. Strip markdown fences kalau ada (defensive)."""
     if not text:
         return {}
 
     cleaned = text.strip()
+    # Strip markdown code fences kalau Claude balikinnya kepake fence
     cleaned = re.sub(r"^```(?:json)?\s*", "", cleaned)
     cleaned = re.sub(r"\s*```$", "", cleaned)
     cleaned = cleaned.strip()
@@ -276,6 +328,7 @@ def _parse_json_response(text: str) -> dict[str, dict[str, str]]:
     try:
         data = json.loads(cleaned)
     except json.JSONDecodeError:
+        # Fallback: cari blok JSON pertama dengan regex
         match = re.search(r"\{.*\}", cleaned, re.DOTALL)
         if not match:
             return {}
