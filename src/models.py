@@ -9,6 +9,7 @@ class Target:
     domain: str
     niche: str
     category_name: str = ""
+    location: str = ""
     extra: dict[str, Any] = field(default_factory=dict)
 
     @property
@@ -38,11 +39,6 @@ class PixelSignals:
 
 
 @dataclass(slots=True)
-class TechStack:
-    platform: str | None = None
-
-
-@dataclass(slots=True)
 class PageSpeedResult:
     available: bool
     performance_score: int | None = None
@@ -69,7 +65,6 @@ class EnrichmentResult:
     pagespeed_score: int | None
     lcp_ms: int | None
     error: str | None = None
-    extra: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass(slots=True)
@@ -79,7 +74,6 @@ class QualifiedLead:
     category_name: str
     location: str
     score: float
-    score_breakdown: dict[str, float]
     response_ms: int | None
     platform: str | None
     meta_pixel_in_html: bool
@@ -88,6 +82,10 @@ class QualifiedLead:
     google_ads_in_html: bool
     pagespeed_score: int | None
     lcp_ms: int | None
-    gold_reasons: str = ""        # Diisi oleh Claude analyst
-    outreach_angle: str = ""      # Diisi oleh Claude analyst
-    extra: dict[str, Any] = field(default_factory=dict)
+    gold_reasons: str = ""
+    outreach_angle: str = ""
+
+
+class TargetsValidationError(Exception):
+    """Raised kalau targets.yaml invalid."""
+    pass
