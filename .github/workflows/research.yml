@@ -1,0 +1,169 @@
+name: Apex Intel Research Pipeline
+
+# ============================================================
+# Triggers
+# ============================================================
+on:
+  # Manual trigger dari tab Actions
+  workflow_dispatch:
+
+  # Auto-run tiap Senin jam 02:00 UTC (= Senin 09:00 WIB)
+  schedule:
+    - cron: '0 2 * * 1'
+
+  # Auto-run kalau targets.yaml atau code di src/ berubah
+  push:
+    branches: [main]
+    paths:
+      - 'targets.yaml'
+      - 'src/**'
+      - 'run.py'
+      - 'requirements.txt'
+      - '.github/workflows/research.yml'
+
+# ============================================================
+# Permissions (minimum yang dibutuhkan)
+# ============================================================
+permissions:
+  contents: read
+
+# ============================================================
+# Concurrency: cancel run lama kalau ada push baru
+# ============================================================
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# ============================================================
+# Jobs
+# ============================================================
+jobs:
+  research:
+    name: Run Enrichment & Qualification Pipeline
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    env:
+      # Bikin Python bisa import 'src.xxx' tanpa pip install -e
+      PYTHONPATH: ${{ github.workspace }}
+      # Secrets dari Settings → Secrets and variables → Actions
+      PAGESPEED_API_KEY: ${{ secrets.PAGESPEED_API_KEY }}
+      IDINCODE_API: ${{ secrets.IdinCode_Api }}
+      # Bikin output Python langsung muncul di log (gak di-buffer)
+      PYTHONUNBUFFERED: '1'
+
+    steps:
+      # --------------------------------------------------------
+      # 1. Checkout repo
+      # --------------------------------------------------------
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # --------------------------------------------------------
+      # 2. Setup Python 3.11
+      # --------------------------------------------------------
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: 'requirements.txt'
+
+      # --------------------------------------------------------
+      # 3. Install dependencies
+      # --------------------------------------------------------
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # --------------------------------------------------------
+      # 4. Sanity check: pastikan semua import jalan
+      # --------------------------------------------------------
+      - name: Verify imports
+        run: |
+          python -c "from src.models import Target, TargetsValidationError, QualifiedLead; print('✅ models OK')"
+          python -c "from src.targets_loader import load_targets; print('✅ targets_loader OK')"
+          python -c "from src.enrichers import fetch_site, detect_pixels, detect_platform, fetch_pagespeed; print('✅ enrichers OK')"
+          python -c "from src.qualifier import NICHE_CONFIG; print('✅ qualifier OK')"
+
+      # --------------------------------------------------------
+      # 5. Validasi targets.yaml sebelum run
+      # --------------------------------------------------------
+      - name: Validate targets.yaml
+        run: |
+          python -c "
+          from src.targets_loader import load_targets
+          targets = load_targets('targets.yaml')
+          print(f'✅ Loaded {len(targets)} targets')
+          for t in targets[:5]:
+              print(f'  - {t.domain} ({t.niche}) @ {t.location}')
+          "
+
+      # --------------------------------------------------------
+      # 6. Run pipeline
+      # --------------------------------------------------------
+      - name: Run Apex Intel pipeline
+        run: |
+          mkdir -p output
+          python run.py
+        env:
+          PAGESPEED_API_KEY: ${{ secrets.PAGESPEED_API_KEY }}
+          IDINCODE_API: ${{ secrets.IdinCode_Api }}
+
+      # --------------------------------------------------------
+      # 7. List output (buat debugging)
+      # --------------------------------------------------------
+      - name: Show output files
+        if: always()
+        run: |
+          echo "=== Output directory ==="
+          ls -lah output/ || echo "No output directory"
+          echo ""
+          echo "=== CSV files ==="
+          find output -name "*.csv" -exec echo "--- {} ---" \; -exec head -5 {} \; || echo "No CSV files"
+
+      # --------------------------------------------------------
+      # 8. Upload hasil sebagai Artifact (tahan 30 hari)
+      # --------------------------------------------------------
+      - name: Upload research output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: apex-intel-output-${{ github.run_number }}
+          path: |
+            output/**/*.csv
+            output/**/*.json
+          retention-days: 30
+          if-no-files-found: warn
+
+      # --------------------------------------------------------
+      # 9. Summary di GitHub UI
+      # --------------------------------------------------------
+      - name: Generate run summary
+        if: always()
+        run: |
+          {
+            echo "## 🎯 Apex Intel Research Run #${{ github.run_number }}"
+            echo ""
+            echo "**Trigger:** ${{ github.event_name }}"
+            echo "**Time:** $(date -u +'%Y-%m-%d %H:%M:%S UTC')"
+            echo ""
+            echo "### Output Files"
+            echo ""
+            if [ -d "output" ]; then
+              echo "| File | Size | Lines |"
+              echo "|------|------|-------|"
+              for f in output/*.csv; do
+                if [ -f "$f" ]; then
+                  size=$(du -h "$f" | cut -f1)
+                  lines=$(wc -l < "$f")
+                  echo "| \`$(basename $f)\` | $size | $lines |"
+                fi
+              done
+            else
+              echo "_No output directory found._"
+            fi
+            echo ""
+            echo "📥 **Download hasil:** Scroll ke bawah ke section **Artifacts**"
+          } >> $GITHUB_STEP_SUMMARY
