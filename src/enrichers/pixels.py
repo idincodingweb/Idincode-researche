@@ -1,40 +1,44 @@
 # src/enrichers/pixels.py
 from __future__ import annotations
-from dataclasses import dataclass
+import re
 
-@dataclass(slots=True)
-class PixelResult:
-    has_meta: bool
-    has_tiktok: bool
-    has_ga4: bool
-    has_gtm: bool
+from src.models import PixelSignals
 
-    @property
-    def has_any_tracking(self) -> bool:
-        return self.has_meta or self.has_tiktok or self.has_ga4 or self.has_gtm
+_META = [
+    re.compile(r"connect\.facebook\.net/[^/]+/fbevents\.js", re.I),
+    re.compile(r"fbq\s*\(\s*['\"]init['\"]", re.I),
+    re.compile(r"facebook-pixel", re.I),
+]
+_TIKTOK = [
+    re.compile(r"analytics\.tiktok\.com", re.I),
+    re.compile(r"ttq\.load\s*\(", re.I),
+]
+_GA4 = [
+    re.compile(r"googletagmanager\.com/gtag/js\?id=G-", re.I),
+    re.compile(r"gtag\s*\(\s*['\"]config['\"]\s*,\s*['\"]G-", re.I),
+]
+_GTM = [
+    re.compile(r"googletagmanager\.com/gtm\.js\?id=GTM-", re.I),
+    re.compile(r"GTM-[A-Z0-9]{4,}", re.I),
+]
+_GOOGLE_ADS = [
+    re.compile(r"googletagmanager\.com/gtag/js\?id=AW-", re.I),
+    re.compile(r"gtag\s*\(\s*['\"]config['\"]\s*,\s*['\"]AW-", re.I),
+    re.compile(r"googleadservices\.com", re.I),
+]
 
-def detect_pixels_in_html(html: str) -> PixelResult:
-    """
-    Scan HTML untuk footprint tracking script populer.
-    Ini pure function, gampang di-test.
-    """
-    html_lower = html.lower()
-    
-    # Meta (Facebook) Pixel
-    has_meta = "fbevents.js" in html_lower or "connect.facebook.net" in html_lower
-    
-    # TikTok Pixel
-    has_tiktok = "analytics.tiktok.com/i18n/pixel" in html_lower or "ttq.load" in html_lower
-    
-    # Google Analytics 4 (gtag)
-    has_ga4 = "googletagmanager.com/gtag/js" in html_lower
-    
-    # Google Tag Manager (sering dipakai buat hide pixel lain)
-    has_gtm = "googletagmanager.com/gtm.js" in html_lower
 
-    return PixelResult(
-        has_meta=has_meta,
-        has_tiktok=has_tiktok,
-        has_ga4=has_ga4,
-        has_gtm=has_gtm
+def _matches_any(html: str, patterns) -> bool:
+    return any(p.search(html) for p in patterns)
+
+
+def detect_pixels(html: str) -> PixelSignals:
+    if not html:
+        return PixelSignals()
+    return PixelSignals(
+        has_meta=_matches_any(html, _META),
+        has_tiktok=_matches_any(html, _TIKTOK),
+        has_ga4=_matches_any(html, _GA4),
+        has_gtm=_matches_any(html, _GTM),
+        has_google_ads=_matches_any(html, _GOOGLE_ADS),
     )
