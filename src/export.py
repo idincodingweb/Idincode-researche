@@ -42,7 +42,7 @@ def export_tiered_csvs(leads: list[QualifiedLead]) -> list[str]:
 
     # Handle empty input — tetep bikin file kosong biar artifact upload gak fail
     if not leads:
-        print("[export] ⚠️  No leads to export. Writing empty leads_all.csv for debugging.")
+        print("[export] WARN: No leads to export. Writing empty leads_all.csv for debugging.")
         empty_path = Path(OUTPUT_DIR) / "leads_all.csv"
         _write_csv(empty_path, [])
         return [str(empty_path)]
@@ -50,10 +50,7 @@ def export_tiered_csvs(leads: list[QualifiedLead]) -> list[str]:
     # Sort by score descending, kasih rank
     sorted_leads = sorted(leads, key=lambda x: x.score, reverse=True)
     for idx, lead in enumerate(sorted_leads, start=1):
-        try:
-            lead.rank = idx
-        except AttributeError:
-            pass  # kalau dataclass pakai slots tanpa rank, skip aja
+        lead.rank = idx
 
     output_files: list[str] = []
 
@@ -81,13 +78,14 @@ def export_tiered_csvs(leads: list[QualifiedLead]) -> list[str]:
     return output_files
 
 
+# Alias backward-compatible (biar pipeline.py bisa import dengan nama mana aja)
+export_tiered = export_tiered_csvs
+
+
 def _with_local_rank(lead: QualifiedLead, rank: int) -> QualifiedLead:
     """Bikin shallow copy dengan rank lokal (untuk tiered CSV)."""
     new = copy(lead)
-    try:
-        new.rank = rank
-    except AttributeError:
-        pass
+    new.rank = rank
     return new
 
 
@@ -119,10 +117,3 @@ def _write_csv(path: Path, leads: list[QualifiedLead]) -> None:
 
 def _yn(b: bool) -> str:
     return "yes" if b else "no"
-
-
-# ============================================================
-# Alias backward-compatible (biar pipeline.py bisa import dengan nama mana aja)
-# PENTING: alias HARUS di paling bawah, SETELAH function-nya didefinisikan
-# ============================================================
-export_tiered = export_tiered_csvs
