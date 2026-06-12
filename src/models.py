@@ -2,10 +2,34 @@
 """Dataclasses untuk pipeline. Type-safe, self-documenting."""
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional
 
 
+# ============================================================
+# Input: dari targets.yaml (dipakai loader.py)
+# ============================================================
+@dataclass
+class Target:
+    """Single target dari targets.yaml — input mentah sebelum di-enrich."""
+    domain: str
+    location: Optional[str] = None
+    niche: str = "default"
+    category: Optional[str] = None
+
+    def to_dict(self) -> dict:
+        """Convert ke dict — kompatibel dengan enrich_domain() yang expect dict."""
+        return {
+            "domain": self.domain,
+            "location": self.location,
+            "niche": self.niche,
+            "category": self.category,
+        }
+
+
+# ============================================================
+# Intermediate: hasil enrichment (dipakai enrichers.py)
+# ============================================================
 @dataclass
 class EnrichmentResult:
     """Raw enrichment data per domain (sebelum scoring)."""
@@ -16,25 +40,28 @@ class EnrichmentResult:
 
     # Reachability
     reachable: bool
-    fail_reason: Optional[str]
-    response_ms: Optional[int]
-    status_code: Optional[int]
+    fail_reason: Optional[str] = None
+    response_ms: Optional[int] = None
+    status_code: Optional[int] = None
 
     # Platform
-    platform: Optional[str]
+    platform: Optional[str] = None
 
     # Pixels (from HTML)
-    has_meta_pixel: bool
-    has_tiktok_pixel: bool
-    has_ga4: bool
-    has_gtm: bool
-    has_google_ads: bool
+    has_meta_pixel: bool = False
+    has_tiktok_pixel: bool = False
+    has_ga4: bool = False
+    has_gtm: bool = False
+    has_google_ads: bool = False
 
     # Performance (from PageSpeed API)
-    pagespeed_score: Optional[int]
-    lcp_ms: Optional[int]
+    pagespeed_score: Optional[int] = None
+    lcp_ms: Optional[int] = None
 
 
+# ============================================================
+# Final: scored lead siap export (dipakai qualifier.py, analyst.py, export.py)
+# ============================================================
 @dataclass
 class QualifiedLead:
     """Scored lead, siap di-enrich AI & export."""
@@ -44,16 +71,16 @@ class QualifiedLead:
     category: Optional[str]
     score: float
 
-    platform: Optional[str]
-    meta_pixel_in_html: bool
-    tiktok_pixel_in_html: bool
-    ga4_in_html: bool
-    gtm_in_html: bool
-    google_ads_in_html: bool
+    platform: Optional[str] = None
+    meta_pixel_in_html: bool = False
+    tiktok_pixel_in_html: bool = False
+    ga4_in_html: bool = False
+    gtm_in_html: bool = False
+    google_ads_in_html: bool = False
 
-    pagespeed_score: Optional[int]
-    lcp_ms: Optional[int]
-    response_ms: Optional[int]
+    pagespeed_score: Optional[int] = None
+    lcp_ms: Optional[int] = None
+    response_ms: Optional[int] = None
 
     # AI-generated (filled by analyst.py)
     gold_reasons: str = ""
