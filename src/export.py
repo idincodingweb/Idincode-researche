@@ -1,4 +1,8 @@
 # src/export.py
+# === Tambah di paling bawah export.py ===
+
+# Alias buat backward-compat (jaga-jaga kalau ada code lain manggil nama baru)
+export_tiered = export_tiered_csvs
 """Export qualified leads ke CSV bertingkat (Starter / Pro / Premium Gold).
 
 ARSITEKTUR:
