@@ -11,7 +11,13 @@ from src.models import EnrichmentResult, QualifiedLead
 # Niche Weights (sum = 1.0 per niche)
 # ============================================================
 NICHE_CONFIG: dict[str, dict[str, float]] = {
-    # ... existing configs ...
+    # DEFAULT fallback — WAJIB ada biar .get(niche, NICHE_CONFIG["default"]) gak KeyError
+    "default": {
+        "pixels": 0.40,
+        "pagespeed": 0.30,
+        "lcp": 0.15,
+        "platform": 0.15,
+    },
     "cosmetic_dentistry": {
         "pixels": 0.45,
         "pagespeed": 0.30,
@@ -102,7 +108,6 @@ def _score_pixels(e: EnrichmentResult) -> float:
     ]
     present = sum(core_pixels)
 
-    # Inverted mapping
     if present == 0:
         return 1.00
     if present == 1:
@@ -111,13 +116,13 @@ def _score_pixels(e: EnrichmentResult) -> float:
         return 0.60
     if present == 3:
         return 0.30
-    return 0.10  # 4/4 pixel = mature, low opportunity
+    return 0.10
 
 
 def _score_pagespeed(score: Optional[int]) -> float:
     """Inverted: 0-29 = 1.0, 85-100 = 0.10."""
     if score is None:
-        return 0.50  # Neutral kalau data gak ada
+        return 0.50
     if score < 30:
         return 1.00
     if score < 50:
