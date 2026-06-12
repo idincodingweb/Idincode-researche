@@ -1,23 +1,10 @@
 # src/export.py
-# === Tambah di paling bawah export.py ===
-
-# Alias buat backward-compat (jaga-jaga kalau ada code lain manggil nama baru)
-export_tiered = export_tiered_csvs
-"""Export qualified leads ke CSV bertingkat (Starter / Pro / Premium Gold).
-
-ARSITEKTUR:
-- export_tiered() = entry point dari pipeline (sesuai naming pipeline.py)
-- export_tiered_csvs() = alias backward-compatible
-- Tiered logic: filter by min_score, limit by tier, re-rank locally
-- Output dir auto-create kalau belum ada
-"""
+"""Export qualified leads ke CSV bertingkat (Starter / Pro / Premium Gold)."""
 from __future__ import annotations
 
 import csv
 from copy import copy
-from dataclasses import replace
 from pathlib import Path
-from typing import Optional
 
 from src.config import OUTPUT_DIR, TIER_CONFIGS
 from src.models import QualifiedLead
@@ -35,7 +22,6 @@ _CSV_COLUMNS = [
     "gold_score",
     "platform",
     "meta_pixel_in_html",
-    "tiktok_pixel_in_html",
     "ga4_in_html",
     "gtm_in_html",
     "google_ads_in_html",
@@ -47,53 +33,44 @@ _CSV_COLUMNS = [
 ]
 
 
-# ============================================================
-# Public API
-# ============================================================
-def export_tiered(
-    leads: list[QualifiedLead],
-    output_dir: Optional[str] = None,
-) -> list[str]:
-    """Entry point dipanggil dari pipeline.py.
+def export_tiered_csvs(leads: list[QualifiedLead]) -> list[str]:
+    """Export ke 4 file: leads_all + 3 tiered.
 
-    Args:
-        leads: list QualifiedLead (sudah di-sort by score di pipeline)
-        output_dir: override OUTPUT_DIR dari config (untuk testing)
-
-    Returns:
-        list path file yang berhasil di-export
+    Returns: list path file yang berhasil di-export.
     """
-    out_dir = Path(output_dir) if output_dir else Path(OUTPUT_DIR)
-    out_dir.mkdir(parents=True, exist_ok=True)
+    Path(OUTPUT_DIR).mkdir(parents=True, exist_ok=True)
 
-    # Handle empty input (kalau 0 reachable, masih bikin file kosong biar
-    # GitHub Actions artifact upload gak fail)
+    # Handle empty input — tetep bikin file kosong biar artifact upload gak fail
     if not leads:
-        print("[export] ⚠️  No leads to export. Writing empty CSV files for debugging.")
-        empty_path = out_dir / "leads_all.csv"
+        print("[export] ⚠️  No leads to export. Writing empty leads_all.csv for debugging.")
+        empty_path = Path(OUTPUT_DIR) / "leads_all.csv"
         _write_csv(empty_path, [])
         return [str(empty_path)]
 
-    # Sort + assign global rank (defensive — pipeline harusnya udah sort)
+    # Sort by score descending, kasih rank
     sorted_leads = sorted(leads, key=lambda x: x.score, reverse=True)
-    ranked_all = [_assign_rank(lead, idx) for idx, lead in enumerate(sorted_leads, 1)]
+    for idx, lead in enumerate(sorted_leads, start=1):
+        try:
+            lead.rank = idx
+        except AttributeError:
+            pass  # kalau dataclass pakai slots tanpa rank, skip aja
 
     output_files: list[str] = []
 
     # 1. Internal master file (semua leads)
-    all_path = out_dir / "leads_all.csv"
-    _write_csv(all_path, ranked_all)
-    print(f"[export] OK leads_all.csv         ({len(ranked_all)} leads) - INTERNAL")
+    all_path = Path(OUTPUT_DIR) / "leads_all.csv"
+    _write_csv(all_path, sorted_leads)
+    print(f"[export] OK leads_all.csv         ({len(sorted_leads)} leads) - INTERNAL")
     output_files.append(str(all_path))
 
     # 2. Tiered exports
     for tier in TIER_CONFIGS:
-        filtered = [lead for lead in ranked_all if lead.score >= tier["min_score"]]
+        filtered = [l for l in sorted_leads if l.score >= tier["min_score"]]
         filtered = filtered[: tier["limit"]]
-        # Re-rank lokal dalam tier
-        ranked = [_assign_rank(lead, idx) for idx, lead in enumerate(filtered, 1)]
+        # Re-rank dalam tier (rank 1 = best dalam tier itu)
+        ranked = [_with_local_rank(l, idx) for idx, l in enumerate(filtered, 1)]
 
-        tier_path = out_dir / tier["filename"]
+        tier_path = Path(OUTPUT_DIR) / tier["filename"]
         _write_csv(tier_path, ranked)
         print(
             f"[export] OK {tier['filename']:<24} "
@@ -104,34 +81,14 @@ def export_tiered(
     return output_files
 
 
-# Backward-compatible alias (kalau ada code lain yang masih panggil nama lama)
-def export_tiered_csvs(leads: list[QualifiedLead]) -> list[str]:
-    return export_tiered(leads)
-
-
-# ============================================================
-# Helpers
-# ============================================================
-def _assign_rank(lead: QualifiedLead, rank: int) -> QualifiedLead:
-    """Bikin copy dengan rank assigned. Defensive terhadap dataclass slots/frozen."""
+def _with_local_rank(lead: QualifiedLead, rank: int) -> QualifiedLead:
+    """Bikin shallow copy dengan rank lokal (untuk tiered CSV)."""
+    new = copy(lead)
     try:
-        # Path 1: dataclass dengan replace() (paling clean)
-        new_lead = replace(lead, rank=rank)
-        return new_lead
-    except (TypeError, ValueError):
-        # Path 2: copy + setattr (kalau rank bukan field formal di dataclass)
-        new_lead = copy(lead)
-        try:
-            setattr(new_lead, "rank", rank)
-        except AttributeError:
-            # Path 3: object pakai __slots__ tanpa rank → silently skip
-            pass
-        return new_lead
-
-
-def _get_rank(lead: QualifiedLead, fallback: int = 0) -> int:
-    """Get rank dengan fallback kalau attribute belum di-set."""
-    return getattr(lead, "rank", fallback)
+        new.rank = rank
+    except AttributeError:
+        pass
+    return new
 
 
 def _write_csv(path: Path, leads: list[QualifiedLead]) -> None:
@@ -141,7 +98,7 @@ def _write_csv(path: Path, leads: list[QualifiedLead]) -> None:
         writer.writerow(_CSV_COLUMNS)
         for lead in leads:
             writer.writerow([
-                _get_rank(lead),
+                getattr(lead, "rank", 0),
                 lead.domain,
                 lead.location or "",
                 lead.niche,
@@ -149,7 +106,6 @@ def _write_csv(path: Path, leads: list[QualifiedLead]) -> None:
                 f"{lead.score:.4f}",
                 lead.platform or "Unknown",
                 _yn(lead.meta_pixel_in_html),
-                _yn(getattr(lead, "tiktok_pixel_in_html", False)),
                 _yn(lead.ga4_in_html),
                 _yn(lead.gtm_in_html),
                 _yn(lead.google_ads_in_html),
@@ -163,3 +119,10 @@ def _write_csv(path: Path, leads: list[QualifiedLead]) -> None:
 
 def _yn(b: bool) -> str:
     return "yes" if b else "no"
+
+
+# ============================================================
+# Alias backward-compatible (biar pipeline.py bisa import dengan nama mana aja)
+# PENTING: alias HARUS di paling bawah, SETELAH function-nya didefinisikan
+# ============================================================
+export_tiered = export_tiered_csvs
