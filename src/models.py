@@ -2,7 +2,7 @@
 """Dataclasses untuk pipeline. Type-safe, self-documenting."""
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Optional
 
 
@@ -16,7 +16,7 @@ class EnrichmentResult:
 
     # Reachability
     reachable: bool
-    fail_reason: Optional[str]  # "connect_timeout", "HTTP 404", dll
+    fail_reason: Optional[str]
     response_ms: Optional[int]
     status_code: Optional[int]
 
@@ -31,7 +31,7 @@ class EnrichmentResult:
     has_google_ads: bool
 
     # Performance (from PageSpeed API)
-    pagespeed_score: Optional[int]  # 0-100
+    pagespeed_score: Optional[int]
     lcp_ms: Optional[int]
 
 
@@ -42,7 +42,7 @@ class QualifiedLead:
     location: Optional[str]
     niche: str
     category: Optional[str]
-    score: float  # 0.0 - 1.0
+    score: float
 
     platform: Optional[str]
     meta_pixel_in_html: bool
@@ -58,3 +58,6 @@ class QualifiedLead:
     # AI-generated (filled by analyst.py)
     gold_reasons: str = ""
     outreach_angle: str = ""
+
+    # Rank (assigned by export.py)
+    rank: int = 0
