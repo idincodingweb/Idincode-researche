@@ -161,7 +161,18 @@ async def _call_claude_batch(
 # Dynamic Prompt Builder (per-niche context)
 # ============================================================
 _NICHE_CONTEXT: dict[str, dict[str, str]] = {
-    # ... existing ...
+_NICHE_CONTEXT: dict[str, dict[str, str]] = {
+    # DEFAULT fallback — WAJIB ada biar .get(niche, _NICHE_CONTEXT["medical_high_ticket"]) gak KeyError
+    "medical_high_ticket": {
+        "industry_label": "high-ticket medical & aesthetic clinics",
+        "typical_ticket": "$3,000-$30,000 per case",
+        "pain_point": "consult-to-book conversion, attribution clarity, ROAS visibility",
+    },
+    "default": {
+        "industry_label": "high-ticket service businesses",
+        "typical_ticket": "$1,000-$10,000 per customer",
+        "pain_point": "lead-to-close conversion, marketing attribution",
+    },
     "cosmetic_dentistry": {
         "industry_label": "cosmetic & implant dentistry practices",
         "typical_ticket": "$3,000-$30,000 per case",
@@ -183,7 +194,6 @@ _NICHE_CONTEXT: dict[str, dict[str, str]] = {
         "pain_point": "high CAC, emotional + surgical decision support",
     },
 }
-
 
 def _detect_primary_niche(leads: list[QualifiedLead]) -> str:
     """Cari niche paling umum di batch."""
