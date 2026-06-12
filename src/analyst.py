@@ -3,12 +3,6 @@
 
 Generate gold_reasons + outreach_angle untuk setiap qualified lead.
 Graceful fallback ke deterministic template kalau API fail.
-
-ARSITEKTUR:
-- Endpoint: POST https://api.kie.ai/claude/v1/messages
-- Format: Anthropic-native (system di top-level, bukan di messages array)
-- Auth: Bearer token via IDINCODE_API env var
-- Response parsing: data["content"][0]["text"]
 """
 from __future__ import annotations
 
@@ -82,17 +76,10 @@ async def _call_claude_batch(
     *,
     max_retries: int,
 ) -> dict[str, dict[str, str]]:
-    """Call kie.ai endpoint /claude/v1/messages (Anthropic-native).
-
-    Return dict {domain: {gold_reasons, outreach_angle}}.
-    """
+    """Call kie.ai endpoint /claude/v1/messages (Anthropic-native)."""
     system_prompt = _build_system_prompt(leads)
     user_prompt = _build_user_prompt(leads)
 
-    # PENTING: Format Anthropic-native
-    # - "system" di top-level (BUKAN di messages array dengan role:system)
-    # - "messages" cuma berisi role: user/assistant
-    # - "thinkingFlag" & "stream" adalah extension proprietary kie.ai
     payload = {
         "model": KIE_AI_MODEL,
         "max_tokens": 4096,
@@ -161,8 +148,6 @@ async def _call_claude_batch(
 # Dynamic Prompt Builder (per-niche context)
 # ============================================================
 _NICHE_CONTEXT: dict[str, dict[str, str]] = {
-_NICHE_CONTEXT: dict[str, dict[str, str]] = {
-    # DEFAULT fallback — WAJIB ada biar .get(niche, _NICHE_CONTEXT["medical_high_ticket"]) gak KeyError
     "medical_high_ticket": {
         "industry_label": "high-ticket medical & aesthetic clinics",
         "typical_ticket": "$3,000-$30,000 per case",
@@ -194,6 +179,7 @@ _NICHE_CONTEXT: dict[str, dict[str, str]] = {
         "pain_point": "high CAC, emotional + surgical decision support",
     },
 }
+
 
 def _detect_primary_niche(leads: list[QualifiedLead]) -> str:
     """Cari niche paling umum di batch."""
@@ -280,27 +266,11 @@ def _build_user_prompt(leads: list[QualifiedLead]) -> str:
 # Response parsing (Anthropic-native format)
 # ============================================================
 def _extract_text_from_response(data: dict[str, Any]) -> str:
-    """Extract text dari Anthropic-native response format.
-
-    Expected structure:
-    {
-        "id": "msg_...",
-        "type": "message",
-        "role": "assistant",
-        "content": [
-            {"type": "text", "text": "..."}
-        ],
-        ...
-    }
-
-    Defensive: handle juga kalau ada thinking block (kalau thinkingFlag=true)
-    yang muncul SEBELUM text block.
-    """
+    """Extract text dari Anthropic-native response format."""
     content = data.get("content")
     if not isinstance(content, list) or not content:
         return ""
 
-    # Cari block pertama yang type == "text" (skip thinking blocks)
     for block in content:
         if not isinstance(block, dict):
             continue
@@ -310,7 +280,6 @@ def _extract_text_from_response(data: dict[str, Any]) -> str:
             if isinstance(text, str) and text:
                 return text
 
-    # Fallback: kalau gak ada type field, coba ambil text dari block pertama
     first = content[0]
     if isinstance(first, dict):
         text = first.get("text", "")
@@ -326,7 +295,6 @@ def _parse_json_response(text: str) -> dict[str, dict[str, str]]:
         return {}
 
     cleaned = text.strip()
-    # Strip markdown code fences kalau Claude balikinnya kepake fence
     cleaned = re.sub(r"^```(?:json)?\s*", "", cleaned)
     cleaned = re.sub(r"\s*```$", "", cleaned)
     cleaned = cleaned.strip()
@@ -334,7 +302,6 @@ def _parse_json_response(text: str) -> dict[str, dict[str, str]]:
     try:
         data = json.loads(cleaned)
     except json.JSONDecodeError:
-        # Fallback: cari blok JSON pertama dengan regex
         match = re.search(r"\{.*\}", cleaned, re.DOTALL)
         if not match:
             return {}
@@ -454,4 +421,4 @@ def _fallback_outreach(lead: QualifiedLead) -> str:
     return (
         f"Subject: 3 quick wins I spotted for {domain_label} "
         f"(takes 5 min to read)"
-    )
+                )
