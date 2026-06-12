@@ -1,20 +1,480 @@
 targets:
-  - domain: smile-design-manhattan.com
+  - domain: cosmetic-newyork1.com
     location: "New York, NY"
     niche: cosmetic_dentistry
-    category: "Premium Cosmetic Dentistry"
-  
-  - domain: nyulangone.org
+    category: "Cosmetic Dentistry"
+
+  - domain: cosmetic-newyork2.com
     location: "New York, NY"
     niche: cosmetic_dentistry
-    category: "Premium Medical Center"
-  
-  - domain: mayoclinic.org
-    location: "Rochester, MN"
+    category: "Cosmetic Dentistry"
+
+  - domain: cosmetic-newyork3.com
+    location: "New York, NY"
+    niche: cosmetic_dentistry
+    category: "Cosmetic Dentistry"
+
+  - domain: premium-newyork1.com
+    location: "New York, NY"
+    niche: premium_orthodontics
+    category: "Premium Orthodontics"
+
+  - domain: premium-newyork2.com
+    location: "New York, NY"
+    niche: premium_orthodontics
+    category: "Premium Orthodontics"
+
+  - domain: premium-newyork3.com
+    location: "New York, NY"
+    niche: premium_orthodontics
+    category: "Premium Orthodontics"
+
+  - domain: weight-newyork1.com
+    location: "New York, NY"
     niche: weight_loss_glp1
-    category: "Medical Center"
-  
-  - domain: clevelandclinic.org
-    location: "Cleveland, OH"
+    category: "Weight Loss / GLP-1"
+
+  - domain: weight-newyork2.com
+    location: "New York, NY"
     niche: weight_loss_glp1
-    category: "Medical Center"
+    category: "Weight Loss / GLP-1"
+
+  - domain: weight-newyork3.com
+    location: "New York, NY"
+    niche: weight_loss_glp1
+    category: "Weight Loss / GLP-1"
+
+  - domain: premium-newyork1.com
+    location: "New York, NY"
+    niche: premium_hair_restoration
+    category: "Premium Hair Restoration"
+
+  - domain: premium-newyork2.com
+    location: "New York, NY"
+    niche: premium_hair_restoration
+    category: "Premium Hair Restoration"
+
+  - domain: premium-newyork3.com
+    location: "New York, NY"
+    niche: premium_hair_restoration
+    category: "Premium Hair Restoration"
+
+  - domain: cosmetic-losangeles1.com
+    location: "Los Angeles, CA"
+    niche: cosmetic_dentistry
+    category: "Cosmetic Dentistry"
+
+  - domain: cosmetic-losangeles2.com
+    location: "Los Angeles, CA"
+    niche: cosmetic_dentistry
+    category: "Cosmetic Dentistry"
+
+  - domain: cosmetic-losangeles3.com
+    location: "Los Angeles, CA"
+    niche: cosmetic_dentistry
+    category: "Cosmetic Dentistry"
+
+  - domain: premium-losangeles1.com
+    location: "Los Angeles, CA"
+    niche: premium_orthodontics
+    category: "Premium Orthodontics"
+
+  - domain: premium-losangeles2.com
+    location: "Los Angeles, CA"
+    niche: premium_orthodontics
+    category: "Premium Orthodontics"
+
+  - domain: premium-losangeles3.com
+    location: "Los Angeles, CA"
+    niche: premium_orthodontics
+    category: "Premium Orthodontics"
+
+  - domain: weight-losangeles1.com
+    location: "Los Angeles, CA"
+    niche: weight_loss_glp1
+    category: "Weight Loss / GLP-1"
+
+  - domain: weight-losangeles2.com
+    location: "Los Angeles, CA"
+    niche: weight_loss_glp1
+    category: "Weight Loss / GLP-1"
+
+  - domain: weight-losangeles3.com
+    location: "Los Angeles, CA"
+    niche: weight_loss_glp1
+    category: "Weight Loss / GLP-1"
+
+  - domain: premium-losangeles1.com
+    location: "Los Angeles, CA"
+    niche: premium_hair_restoration
+    category: "Premium Hair Restoration"
+
+  - domain: premium-losangeles2.com
+    location: "Los Angeles, CA"
+    niche: premium_hair_restoration
+    category: "Premium Hair Restoration"
+
+  - domain: premium-losangeles3.com
+    location: "Los Angeles, CA"
+    niche: premium_hair_restoration
+    category: "Premium Hair Restoration"
+
+  - domain: cosmetic-miami1.com
+    location: "Miami, FL"
+    niche: cosmetic_dentistry
+    category: "Cosmetic Dentistry"
+
+  - domain: cosmetic-miami2.com
+    location: "Miami, FL"
+    niche: cosmetic_dentistry
+    category: "Cosmetic Dentistry"
+
+  - domain: cosmetic-miami3.com
+    location: "Miami, FL"
+    niche: cosmetic_dentistry
+    category: "Cosmetic Dentistry"
+
+  - domain: premium-miami1.com
+    location: "Miami, FL"
+    niche: premium_orthodontics
+    category: "Premium Orthodontics"
+
+  - domain: premium-miami2.com
+    location: "Miami, FL"
+    niche: premium_orthodontics
+    category: "Premium Orthodontics"
+
+  - domain: premium-miami3.com
+    location: "Miami, FL"
+    niche: premium_orthodontics
+    category: "Premium Orthodontics"
+
+  - domain: weight-miami1.com
+    location: "Miami, FL"
+    niche: weight_loss_glp1
+    category: "Weight Loss / GLP-1"
+
+  - domain: weight-miami2.com
+    location: "Miami, FL"
+    niche: weight_loss_glp1
+    category: "Weight Loss / GLP-1"
+
+  - domain: weight-miami3.com
+    location: "Miami, FL"
+    niche: weight_loss_glp1
+    category: "Weight Loss / GLP-1"
+
+  - domain: premium-miami1.com
+    location: "Miami, FL"
+    niche: premium_hair_restoration
+    category: "Premium Hair Restoration"
+
+  - domain: premium-miami2.com
+    location: "Miami, FL"
+    niche: premium_hair_restoration
+    category: "Premium Hair Restoration"
+
+  - domain: premium-miami3.com
+    location: "Miami, FL"
+    niche: premium_hair_restoration
+    category: "Premium Hair Restoration"
+
+  - domain: cosmetic-chicago1.com
+    location: "Chicago, IL"
+    niche: cosmetic_dentistry
+    category: "Cosmetic Dentistry"
+
+  - domain: cosmetic-chicago2.com
+    location: "Chicago, IL"
+    niche: cosmetic_dentistry
+    category: "Cosmetic Dentistry"
+
+  - domain: cosmetic-chicago3.com
+    location: "Chicago, IL"
+    niche: cosmetic_dentistry
+    category: "Cosmetic Dentistry"
+
+  - domain: premium-chicago1.com
+    location: "Chicago, IL"
+    niche: premium_orthodontics
+    category: "Premium Orthodontics"
+
+  - domain: premium-chicago2.com
+    location: "Chicago, IL"
+    niche: premium_orthodontics
+    category: "Premium Orthodontics"
+
+  - domain: premium-chicago3.com
+    location: "Chicago, IL"
+    niche: premium_orthodontics
+    category: "Premium Orthodontics"
+
+  - domain: weight-chicago1.com
+    location: "Chicago, IL"
+    niche: weight_loss_glp1
+    category: "Weight Loss / GLP-1"
+
+  - domain: weight-chicago2.com
+    location: "Chicago, IL"
+    niche: weight_loss_glp1
+    category: "Weight Loss / GLP-1"
+
+  - domain: weight-chicago3.com
+    location: "Chicago, IL"
+    niche: weight_loss_glp1
+    category: "Weight Loss / GLP-1"
+
+  - domain: premium-chicago1.com
+    location: "Chicago, IL"
+    niche: premium_hair_restoration
+    category: "Premium Hair Restoration"
+
+  - domain: premium-chicago2.com
+    location: "Chicago, IL"
+    niche: premium_hair_restoration
+    category: "Premium Hair Restoration"
+
+  - domain: premium-chicago3.com
+    location: "Chicago, IL"
+    niche: premium_hair_restoration
+    category: "Premium Hair Restoration"
+
+  - domain: cosmetic-sanfrancisco1.com
+    location: "San Francisco, CA"
+    niche: cosmetic_dentistry
+    category: "Cosmetic Dentistry"
+
+  - domain: cosmetic-sanfrancisco2.com
+    location: "San Francisco, CA"
+    niche: cosmetic_dentistry
+    category: "Cosmetic Dentistry"
+
+  - domain: cosmetic-sanfrancisco3.com
+    location: "San Francisco, CA"
+    niche: cosmetic_dentistry
+    category: "Cosmetic Dentistry"
+
+  - domain: premium-sanfrancisco1.com
+    location: "San Francisco, CA"
+    niche: premium_orthodontics
+    category: "Premium Orthodontics"
+
+  - domain: premium-sanfrancisco2.com
+    location: "San Francisco, CA"
+    niche: premium_orthodontics
+    category: "Premium Orthodontics"
+
+  - domain: premium-sanfrancisco3.com
+    location: "San Francisco, CA"
+    niche: premium_orthodontics
+    category: "Premium Orthodontics"
+
+  - domain: weight-sanfrancisco1.com
+    location: "San Francisco, CA"
+    niche: weight_loss_glp1
+    category: "Weight Loss / GLP-1"
+
+  - domain: weight-sanfrancisco2.com
+    location: "San Francisco, CA"
+    niche: weight_loss_glp1
+    category: "Weight Loss / GLP-1"
+
+  - domain: weight-sanfrancisco3.com
+    location: "San Francisco, CA"
+    niche: weight_loss_glp1
+    category: "Weight Loss / GLP-1"
+
+  - domain: premium-sanfrancisco1.com
+    location: "San Francisco, CA"
+    niche: premium_hair_restoration
+    category: "Premium Hair Restoration"
+
+  - domain: premium-sanfrancisco2.com
+    location: "San Francisco, CA"
+    niche: premium_hair_restoration
+    category: "Premium Hair Restoration"
+
+  - domain: premium-sanfrancisco3.com
+    location: "San Francisco, CA"
+    niche: premium_hair_restoration
+    category: "Premium Hair Restoration"
+
+  - domain: cosmetic-austin1.com
+    location: "Austin, TX"
+    niche: cosmetic_dentistry
+    category: "Cosmetic Dentistry"
+
+  - domain: cosmetic-austin2.com
+    location: "Austin, TX"
+    niche: cosmetic_dentistry
+    category: "Cosmetic Dentistry"
+
+  - domain: cosmetic-austin3.com
+    location: "Austin, TX"
+    niche: cosmetic_dentistry
+    category: "Cosmetic Dentistry"
+
+  - domain: premium-austin1.com
+    location: "Austin, TX"
+    niche: premium_orthodontics
+    category: "Premium Orthodontics"
+
+  - domain: premium-austin2.com
+    location: "Austin, TX"
+    niche: premium_orthodontics
+    category: "Premium Orthodontics"
+
+  - domain: premium-austin3.com
+    location: "Austin, TX"
+    niche: premium_orthodontics
+    category: "Premium Orthodontics"
+
+  - domain: weight-austin1.com
+    location: "Austin, TX"
+    niche: weight_loss_glp1
+    category: "Weight Loss / GLP-1"
+
+  - domain: weight-austin2.com
+    location: "Austin, TX"
+    niche: weight_loss_glp1
+    category: "Weight Loss / GLP-1"
+
+  - domain: weight-austin3.com
+    location: "Austin, TX"
+    niche: weight_loss_glp1
+    category: "Weight Loss / GLP-1"
+
+  - domain: premium-austin1.com
+    location: "Austin, TX"
+    niche: premium_hair_restoration
+    category: "Premium Hair Restoration"
+
+  - domain: premium-austin2.com
+    location: "Austin, TX"
+    niche: premium_hair_restoration
+    category: "Premium Hair Restoration"
+
+  - domain: premium-austin3.com
+    location: "Austin, TX"
+    niche: premium_hair_restoration
+    category: "Premium Hair Restoration"
+
+  - domain: cosmetic-dallas1.com
+    location: "Dallas, TX"
+    niche: cosmetic_dentistry
+    category: "Cosmetic Dentistry"
+
+  - domain: cosmetic-dallas2.com
+    location: "Dallas, TX"
+    niche: cosmetic_dentistry
+    category: "Cosmetic Dentistry"
+
+  - domain: cosmetic-dallas3.com
+    location: "Dallas, TX"
+    niche: cosmetic_dentistry
+    category: "Cosmetic Dentistry"
+
+  - domain: premium-dallas1.com
+    location: "Dallas, TX"
+    niche: premium_orthodontics
+    category: "Premium Orthodontics"
+
+  - domain: premium-dallas2.com
+    location: "Dallas, TX"
+    niche: premium_orthodontics
+    category: "Premium Orthodontics"
+
+  - domain: premium-dallas3.com
+    location: "Dallas, TX"
+    niche: premium_orthodontics
+    category: "Premium Orthodontics"
+
+  - domain: weight-dallas1.com
+    location: "Dallas, TX"
+    niche: weight_loss_glp1
+    category: "Weight Loss / GLP-1"
+
+  - domain: weight-dallas2.com
+    location: "Dallas, TX"
+    niche: weight_loss_glp1
+    category: "Weight Loss / GLP-1"
+
+  - domain: weight-dallas3.com
+    location: "Dallas, TX"
+    niche: weight_loss_glp1
+    category: "Weight Loss / GLP-1"
+
+  - domain: premium-dallas1.com
+    location: "Dallas, TX"
+    niche: premium_hair_restoration
+    category: "Premium Hair Restoration"
+
+  - domain: premium-dallas2.com
+    location: "Dallas, TX"
+    niche: premium_hair_restoration
+    category: "Premium Hair Restoration"
+
+  - domain: premium-dallas3.com
+    location: "Dallas, TX"
+    niche: premium_hair_restoration
+    category: "Premium Hair Restoration"
+
+  - domain: cosmetic-boston1.com
+    location: "Boston, MA"
+    niche: cosmetic_dentistry
+    category: "Cosmetic Dentistry"
+
+  - domain: cosmetic-boston2.com
+    location: "Boston, MA"
+    niche: cosmetic_dentistry
+    category: "Cosmetic Dentistry"
+
+  - domain: cosmetic-boston3.com
+    location: "Boston, MA"
+    niche: cosmetic_dentistry
+    category: "Cosmetic Dentistry"
+
+  - domain: premium-boston1.com
+    location: "Boston, MA"
+    niche: premium_orthodontics
+    category: "Premium Orthodontics"
+
+  - domain: premium-boston2.com
+    location: "Boston, MA"
+    niche: premium_orthodontics
+    category: "Premium Orthodontics"
+
+  - domain: premium-boston3.com
+    location: "Boston, MA"
+    niche: premium_orthodontics
+    category: "Premium Orthodontics"
+
+  - domain: weight-boston1.com
+    location: "Boston, MA"
+    niche: weight_loss_glp1
+    category: "Weight Loss / GLP-1"
+
+  - domain: weight-boston2.com
+    location: "Boston, MA"
+    niche: weight_loss_glp1
+    category: "Weight Loss / GLP-1"
+
+  - domain: weight-boston3.com
+    location: "Boston, MA"
+    niche: weight_loss_glp1
+    category: "Weight Loss / GLP-1"
+
+  - domain: premium-boston1.com
+    location: "Boston, MA"
+    niche: premium_hair_restoration
+    category: "Premium Hair Restoration"
+
+  - domain: premium-boston2.com
+    location: "Boston, MA"
+    niche: premium_hair_restoration
+    category: "Premium Hair Restoration"
+
+  - domain: premium-boston3.com
+    location: "Boston, MA"
+    niche: premium_hair_restoration
+    category: "Premium Hair Restoration"
