@@ -1,5 +1,11 @@
 # src/models.py
-"""Dataclasses untuk pipeline. Type-safe, self-documenting."""
+"""Dataclasses untuk pipeline. Type-safe, self-documenting.
+
+ARSITEKTUR:
+- Target          → input mentah dari targets.yaml (dipakai loader.py)
+- EnrichmentResult → hasil enrichment per domain (dipakai enrichers.py)
+- QualifiedLead   → scored lead siap export (dipakai qualifier/analyst/export)
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -11,7 +17,7 @@ from typing import Optional
 # ============================================================
 @dataclass
 class Target:
-    """Single target dari targets.yaml — input mentah sebelum di-enrich."""
+    """Single target dari targets.yaml — input mentah sebelum enrichment."""
     domain: str
     location: Optional[str] = None
     niche: str = "default"
@@ -60,7 +66,7 @@ class EnrichmentResult:
 
 
 # ============================================================
-# Final: scored lead siap export (dipakai qualifier.py, analyst.py, export.py)
+# Final: scored lead siap export
 # ============================================================
 @dataclass
 class QualifiedLead:
